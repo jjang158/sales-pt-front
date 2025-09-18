@@ -1,4 +1,4 @@
-export type Page = 'chatbot'|'todo' |'dashboard' | 'client-detail' | 'settings' | 'review' | 'record' | 'integrated-customer';
+export type Page = 'chatbot'|'dashboard' | 'client-detail' | 'settings' | 'review' | 'record' | 'integrated-customer';
 
 export interface RecordingContext {
   type: 'task' | 'customer';
@@ -11,6 +11,23 @@ export interface NavigationProps {
   onSelectCustomer?: (customerId: string) => void;
   onStartRecording?: (context: RecordingContext) => void;
 }
+
+// export interface Customer {
+//   id: string;
+//   name: string;
+//   age: number;
+//   email: string;
+//   phone: string;
+//   interestedProduct: string;
+//   stage: 'lead' | 'prospect' | 'opportunity' | 'customer';
+//   lastContact: string;
+//   avatar: string;
+//   birthday: string; // YYYY-MM-DD format
+//   registrationDate?: string; // YYYY-MM-DD format
+//   company?: string;
+//   occupation?: string;
+//   status?: '신규' | '진행중' | '완료' | '보류';
+// }
 
 export interface Customer {
   id: string;
@@ -27,6 +44,19 @@ export interface Customer {
   company?: string;
   occupation?: string;
   status?: '신규' | '진행중' | '완료' | '보류';
+  
+  // 고객 대시보드에서 필요한 추가 속성들
+  totalActivities?: number;
+  recentActivity?: string;
+  pendingTasks?: number;
+  completedTasks?: number;
+  sentiment?: 'positive' | 'neutral' | 'negative';
+  voiceSummaries?: VoiceSummary[];
+  tasks?: Task[];
+  consultations?: Consultation[];
+  consult_count?: number;
+  action_count?: number;
+  pending_count?: number;
 }
 
 export interface Task {
@@ -165,4 +195,17 @@ export interface ConsultListResponse {
   data: {
     list: ConsultListItem[];
   };
+}
+
+export interface DateFilterState {
+  type: 'all' | 'registration' | 'lastContact' | 'birthday' | 'custom';
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface CustomerFilters {
+  searchQuery: string;
+  stageFilter: string;
+  sortBy: string;
+  dateFilter: DateFilterState;
 }

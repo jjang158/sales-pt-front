@@ -636,7 +636,7 @@ export function IntegratedCustomerPage({
                           variant="outline"
                           size="sm"
                           className="flex-1 rounded-xl"
-                          onClick={(e) => {
+                          onClick={(e: React.MouseEvent) => {
                             e.stopPropagation();
                             handleCustomerSelect(customer.id);
                           }}
@@ -651,14 +651,14 @@ export function IntegratedCustomerPage({
       variant="destructive"
       size="sm"
       className="rounded-xl"
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e: React.MouseEvent) => e.stopPropagation()}
     >
       <Plus className="w-4 h-4" />
     </Button>
   </DropdownMenuTrigger>
   <DropdownMenuContent align="end" className="w-44">
     <DropdownMenuItem
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         onStartRecording?.({ type: 'customer', name: customer.name, id: customer.id });
       }}
@@ -667,7 +667,7 @@ export function IntegratedCustomerPage({
       녹음
     </DropdownMenuItem>
     <DropdownMenuItem
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         console.log('사진 촬영:', customer.name);
       }}
@@ -676,7 +676,7 @@ export function IntegratedCustomerPage({
       사진
     </DropdownMenuItem>
     <DropdownMenuItem
-      onClick={(e) => {
+      onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         console.log('텍스트 입력:', customer.name);
       }}

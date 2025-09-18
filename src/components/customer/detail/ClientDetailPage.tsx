@@ -1,13 +1,13 @@
 import React from 'react';
 import { ArrowLeft, Edit, Phone, Mail, Calendar, Mic, MessageSquare, Video, FileText } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Separator } from './ui/separator';
-import { Textarea } from './ui/textarea';
-import { mockCustomers, mockConsultations, mockTasks } from './data/mockData';
-import type { Page } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '../../ui/avatar';
+import { Separator } from '../../ui/separator';
+import { Textarea } from '../../ui/textarea';
+import { mockCustomers, mockConsultations, mockTasks } from '../../data/mockData';
+import type { Page } from '../../../types';
 
 interface ClientDetailPageProps {
   customerId: string | null;
@@ -24,7 +24,7 @@ export function ClientDetailPage({ customerId, onNavigate }: ClientDetailPagePro
       <div className="h-full flex items-center justify-center">
         <div className="text-center text-muted-foreground">
           <p>고객을 찾을 수 없습니다</p>
-          <Button variant="outline" onClick={() => onNavigate('todo')} className="mt-4 rounded-xl">
+          <Button variant="outline" onClick={() => onNavigate('dashboard')} className="mt-4 rounded-xl">
             <ArrowLeft className="w-4 h-4 mr-2" />
             할 일 관리로 돌아가기
           </Button>
@@ -52,7 +52,7 @@ export function ClientDetailPage({ customerId, onNavigate }: ClientDetailPagePro
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => onNavigate('todo')}
+              onClick={() => onNavigate('dashboard')}
               className="rounded-lg"
             >
               <ArrowLeft className="w-4 h-4" />

@@ -1,60 +1,34 @@
+// components/customer/dashboard/CustomerFilters.tsx
 import React from 'react';
 import { Search, Filter, Tag, CalendarDays, X } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { Calendar as CalendarComponent } from '../ui/calendar';
-import { Separator } from '../ui/separator';
+import { Input } from '../../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Button } from '../../ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover';
+import { Calendar as CalendarComponent } from '../../ui/calendar';
+import { Separator } from '../../ui/separator';
+import { CustomerFilters as CustomerFiltersType } from '../../../types/index';
 
-interface CustomerSearchFilterProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  stageFilter: string;
-  setStageFilter: (stage: string) => void;
-  sortBy: string;
-  setSortBy: (sort: string) => void;
-  dateFilterType: 'all' | 'registration' | 'lastContact' | 'birthday' | 'custom';
-  setDateFilterType: (type: 'all' | 'registration' | 'lastContact' | 'birthday' | 'custom') => void;
-  startDate: Date | undefined;
-  setStartDate: (date: Date | undefined) => void;
-  endDate: Date | undefined;
-  setEndDate: (date: Date | undefined) => void;
-  showDatePicker: boolean;
-  setShowDatePicker: (show: boolean) => void;
-  onDateRangeApply: (start: string, end: string) => void;
-  onResetDateFilter: () => void;
-  statistics?: {
-    totalCustomers: number;
-    totalConsults: number;
-    totalActions: number;
-    totalPending: number;
-    completionRate: number;
-  } | null;
+interface CustomerFiltersProps {
+  filters: CustomerFiltersType;
+  onFiltersChange: (filters: Partial<CustomerFiltersType>) => void;
 }
 
-export function CustomerSearchFilter({
-  searchQuery,
-  setSearchQuery,
-  stageFilter,
-  setStageFilter,
-  sortBy,
-  setSortBy,
-  dateFilterType,
-  setDateFilterType,
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
-  showDatePicker,
-  setShowDatePicker,
-  onDateRangeApply,
-  onResetDateFilter,
-  statistics
-}: CustomerSearchFilterProps) {
+export function CustomerFilters({ filters, onFiltersChange }: CustomerFiltersProps) {
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+
+  const resetDateFilter = () => {
+    onFiltersChange({
+      dateFilter: {
+        type: 'all',
+        startDate: undefined,
+        endDate: undefined
+      }
+    });
+  };
 
   const getDateFilterLabel = () => {
-    switch (dateFilterType) {
+    switch (filters.dateFilter.type) {
       case 'registration': return '등록일';
       case 'lastContact': return '마지막 연락일';
       case 'birthday': return '생일';
@@ -63,6 +37,7 @@ export function CustomerSearchFilter({
   };
 
   const formatDateRange = () => {
+    const { startDate, endDate } = filters.dateFilter;
     if (!startDate && !endDate) return '';
     if (startDate && endDate) {
       return `${startDate.toLocaleDateString()} ~ ${endDate.toLocaleDateString()}`;
@@ -80,8 +55,8 @@ export function CustomerSearchFilter({
             <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="고객명, 상품, 키워드로 검색..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={filters.searchQuery}
+              onChange={(e) => onFiltersChange({ searchQuery: e.target.value })}
               className="pl-10 rounded-xl bg-background"
             />
           </div>
@@ -89,7 +64,10 @@ export function CustomerSearchFilter({
 
         <div className="flex items-center gap-2">
           <Tag className="w-4 h-4 text-muted-foreground" />
-          <Select value={stageFilter} onValueChange={setStageFilter}>
+          <Select 
+            value={filters.stageFilter} 
+            onValueChange={(value : string) => onFiltersChange({ stageFilter: value })}
+          >
             <SelectTrigger className="w-36 rounded-xl bg-background">
               <SelectValue placeholder="단계 선택" />
             </SelectTrigger>
@@ -103,7 +81,6 @@ export function CustomerSearchFilter({
           </Select>
         </div>
 
-        {/* 날짜 필터 */}
         <div className="flex items-center gap-2">
           <CalendarDays className="w-4 h-4 text-muted-foreground" />
           <Popover open={showDatePicker} onOpenChange={setShowDatePicker}>
@@ -111,19 +88,19 @@ export function CustomerSearchFilter({
               <Button 
                 variant="outline" 
                 className={`w-44 rounded-xl justify-start text-left bg-background hover:bg-muted/50 ${
-                  dateFilterType !== 'all' ? 'border-primary' : ''
+                  filters.dateFilter.type !== 'all' ? 'border-primary' : ''
                 }`}
               >
                 <CalendarDays className="w-4 h-4 mr-2 shrink-0" />
                 <span className="truncate">
-                  {dateFilterType !== 'all' ? `${getDateFilterLabel()}` : '날짜 필터'}
+                  {filters.dateFilter.type !== 'all' ? `${getDateFilterLabel()}` : '날짜 필터'}
                 </span>
-                {dateFilterType !== 'all' && (
+                {filters.dateFilter.type !== 'all' && (
                   <X 
                     className="w-3 h-3 ml-1 shrink-0 hover:bg-muted rounded-sm" 
                     onClick={(e) => {
                       e.stopPropagation();
-                      onResetDateFilter();
+                      resetDateFilter();
                     }}
                   />
                 )}
@@ -133,7 +110,12 @@ export function CustomerSearchFilter({
               <div className="p-4 space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">날짜 기준</label>
-                  <Select value={dateFilterType} onValueChange={setDateFilterType}>
+                  <Select 
+                    value={filters.dateFilter.type} 
+                    onValueChange={(value: any) => onFiltersChange({
+                      dateFilter: { ...filters.dateFilter, type: value }
+                    })}
+                  >
                     <SelectTrigger className="w-full rounded-xl">
                       <SelectValue />
                     </SelectTrigger>
@@ -146,7 +128,7 @@ export function CustomerSearchFilter({
                   </Select>
                 </div>
                 
-                {dateFilterType !== 'all' && (
+                {filters.dateFilter.type !== 'all' && (
                   <>
                     <Separator />
                     <div className="grid grid-cols-2 gap-2">
@@ -154,8 +136,10 @@ export function CustomerSearchFilter({
                         <label className="text-sm font-medium">시작일</label>
                         <CalendarComponent
                           mode="single"
-                          selected={startDate}
-                          onSelect={setStartDate}
+                          selected={filters.dateFilter.startDate}
+                          onSelect={(date: Date | undefined) => onFiltersChange({
+                            dateFilter: { ...filters.dateFilter, startDate: date }
+                          })}
                           className="rounded-md border"
                         />
                       </div>
@@ -163,8 +147,10 @@ export function CustomerSearchFilter({
                         <label className="text-sm font-medium">종료일</label>
                         <CalendarComponent
                           mode="single"
-                          selected={endDate}
-                          onSelect={setEndDate}
+                          selected={filters.dateFilter.endDate}
+                          onSelect={(date:Date | undefined) => onFiltersChange({
+                            dateFilter: { ...filters.dateFilter, endDate: date }
+                          })}
                           className="rounded-md border"
                         />
                       </div>
@@ -178,22 +164,14 @@ export function CustomerSearchFilter({
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        onClick={onResetDateFilter}
+                        onClick={resetDateFilter}
                         className="flex-1 rounded-xl"
                       >
                         초기화
                       </Button>
                       <Button 
                         size="sm" 
-                        onClick={() => {
-                          if (startDate && endDate) {
-                            onDateRangeApply(
-                              startDate.toISOString().split('T')[0],
-                              endDate.toISOString().split('T')[0]
-                            );
-                          }
-                          setShowDatePicker(false);
-                        }}
+                        onClick={() => setShowDatePicker(false)}
                         className="flex-1 rounded-xl"
                       >
                         적용
@@ -208,7 +186,10 @@ export function CustomerSearchFilter({
 
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select 
+            value={filters.sortBy} 
+            onValueChange={(value:string) => onFiltersChange({ sortBy: value })}
+          >
             <SelectTrigger className="w-36 rounded-xl bg-background">
               <SelectValue placeholder="정렬 기준" />
             </SelectTrigger>
@@ -221,17 +202,6 @@ export function CustomerSearchFilter({
           </Select>
         </div>
       </div>
-
-      {/* API 통계 정보 표시 */}
-      {statistics && (
-        <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">
-          <span>총 고객: {statistics.totalCustomers}명</span>
-          <span>총 상담: {statistics.totalConsults}건</span>
-          <span>처리 완료: {statistics.totalActions}건</span>
-          <span>대기 중: {statistics.totalPending}건</span>
-          <span>처리율: {statistics.completionRate}%</span>
-        </div>
-      )}
     </div>
   );
 }

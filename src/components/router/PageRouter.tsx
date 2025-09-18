@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
 import { DashboardPage } from '../DashboardPage';
 import { IntegratedCustomerPage } from '../IntegratedCustomerPage';
-import { ClientDetailPage } from '../ClientDetailPage';
+import { ClientDetailPage } from '../customer/detail/ClientDetailPage';
 import { SettingsPage } from '../SettingsPage';
-import { ReviewPage } from '../ReviewPage';
-import { RecordPage } from '../RecordPage';
+import { ReviewPage } from '../review/ReviewPage';
+import { RecordPage } from '../record/RecordPage';
 import type { Page, RecordingContext } from '../../types/index';
+import { FloatingChatbot } from '../FloatingChatbot';
 
 interface PageRouterProps {
   readonly currentPage: Page;
@@ -40,75 +41,86 @@ const PAGES = {
   settings: SettingsPage,
   review: ReviewPage,
   record: RecordPage,
+  chatbot: FloatingChatbot
 } as const;
 
-/**
- * Type-safe page router with O(1) resolution
- */
+//Page Router
 export const PageRouter = memo<PageRouterProps>(
   ({
     currentPage,
     selectedCustomerId,
     recordingContext,
     sttResult,
-    recordingData, // 💡 recordingData 추가
+    recordingData,
     navigateTo,
     selectCustomer,
     startRecording,
   }) => {
-    const Component = PAGES[currentPage];
     const commonProps = {
       onNavigate: navigateTo,
       onSelectCustomer: selectCustomer,
       onStartRecording: startRecording,
     };
 
-    if (currentPage === 'client-detail') {
-      if (!selectedCustomerId) throw new Error('Customer ID required');
-      return <Component {...commonProps} customerId={selectedCustomerId} />;
-    }
+    // 각 페이지를 명시적으로 처리
+    switch (currentPage) {
+      case 'client-detail':
+        if (!selectedCustomerId) throw new Error('Customer ID required');
+        return <ClientDetailPage {...commonProps} customerId={selectedCustomerId} />;
 
-    if (currentPage === 'record') {
-      if (!recordingContext) throw new Error('Recording context required');
-      return <Component {...commonProps} context={recordingContext} />;
-    }
+      case 'record':
+        if (!recordingContext) throw new Error('Recording context required');
+        return <RecordPage {...commonProps} context={recordingContext} />;
 
-    if (currentPage === 'review') {
-      console.log('PageRouter - recordingData:', recordingData);
-      console.log('PageRouter - sttResult:', sttResult);
-      // recordingData가 있으면 ReviewPage에 전체 객체로 전달
-      if (recordingData) {
-        return <Component 
-          {...commonProps} 
-          recordingData={recordingData}  // 🔥 이 부분이 핵심!
-          recordedText={recordingData.recordedText}  // 하위 호환성
-          context={recordingData.context}  // 하위 호환성
-      />;
-  }
-  
-  // recordingData가 있으면 ReviewPage에 전달
+      case 'review':
   if (recordingData) {
-    return <Component 
+    // ReviewPage가 요구하는 형태로 데이터 변환
+    const safeRecordingData = {
+      recordedText: recordingData.recordedText,
+      context: recordingData.context,
+      audioBlob: recordingData.audioBlob || new Blob([''], { type: 'audio/wav' }),
+      recordingInfo: {
+        duration: recordingData.recordingInfo.duration,
+        fileSize: recordingData.recordingInfo.fileSize,
+        wordCount: recordingData.recordingInfo.wordCount,
+        confidence: recordingData.recordingInfo.confidence,
+        recordingTimeSeconds: 0  // 기본값으로 0 설정
+      }
+    };
+    
+    return <ReviewPage 
       {...commonProps} 
-      recordedText={recordingData.recordedText}
-      context={recordingData.context}
+      recordingData={safeRecordingData}
     />;
   }
   
-  // sttResult가 있으면 기존 방식으로 전달
   if (sttResult) {
-    return <Component {...commonProps} sttResult={sttResult} />;
+    return <ReviewPage 
+      {...commonProps} 
+      recordedText={sttResult.transcript}
+      context={null}
+    />;
   }
   
-  // 둘 다 없으면 빈 데이터로 진행
-  console.warn('No recording data or STT result available for review page');
-  return <Component 
+  return <ReviewPage 
     {...commonProps} 
     recordedText="" 
     context={null} 
   />;
-}
+      case 'chatbot':
+        return <FloatingChatbot />;
 
-    return <Component {...commonProps} />;
+      case 'dashboard':
+        return <DashboardPage {...commonProps} />;
+
+      case 'integrated-customer':
+        return <IntegratedCustomerPage {...commonProps} />;
+
+      case 'settings':
+        return <SettingsPage {...commonProps} />;
+
+      default:
+        throw new Error(`Unknown page: ${currentPage}`);
+    }
   }
 );

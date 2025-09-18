@@ -1,3 +1,5 @@
+
+//화면 : 다크보드 or 라이드 모드 전환 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';

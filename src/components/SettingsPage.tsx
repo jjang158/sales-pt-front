@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Separator } from './ui/separator';
 import type { Page } from '../types';
 
+//설정 페이지 
 interface SettingsPageProps {
   onNavigate: (page: Page) => void;
 }
@@ -101,7 +102,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                 </div>
                 <Switch 
                   checked={settings.notifications}
-                  onCheckedChange={(checked) => handleSettingChange('notifications', checked)}
+                  onCheckedChange={(checked: boolean) => handleSettingChange('notifications', checked)}
                 />
               </div>
               
@@ -114,7 +115,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                 </div>
                 <Switch 
                   checked={settings.emailNotifications}
-                  onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
+                  onCheckedChange={(checked: boolean) => handleSettingChange('emailNotifications', checked)}
                 />
               </div>
               
@@ -127,7 +128,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                 </div>
                 <Switch 
                   checked={settings.soundAlerts}
-                  onCheckedChange={(checked) => handleSettingChange('soundAlerts', checked)}
+                  onCheckedChange={(checked: boolean) => handleSettingChange('soundAlerts', checked)}
                 />
               </div>
             </CardContent>
@@ -149,7 +150,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                 </div>
                 <Switch 
                   checked={settings.autoSave}
-                  onCheckedChange={(checked) => handleSettingChange('autoSave', checked)}
+                  onCheckedChange={(checked: boolean) => handleSettingChange('autoSave', checked)}
                 />
               </div>
               
@@ -162,7 +163,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                 </div>
                 <Switch 
                   checked={settings.autoTranscribe}
-                  onCheckedChange={(checked) => handleSettingChange('autoTranscribe', checked)}
+                  onCheckedChange={(checked: boolean) => handleSettingChange('autoTranscribe', checked)}
                 />
               </div>
               
@@ -170,7 +171,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
               
               <div className="space-y-2">
                 <Label>녹음 품질</Label>
-                <Select value={settings.recordingQuality} onValueChange={(value) => handleSettingChange('recordingQuality', value)}>
+                <Select value={settings.recordingQuality} onValueChange={(value:string) => handleSettingChange('recordingQuality', value)}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
@@ -200,7 +201,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                 </div>
                 <Switch 
                   checked={settings.dataSync}
-                  onCheckedChange={(checked) => handleSettingChange('dataSync', checked)}
+                  onCheckedChange={(checked: boolean) => handleSettingChange('dataSync', checked)}
                 />
               </div>
               
@@ -231,7 +232,7 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>언어</Label>
-                <Select value={settings.language} onValueChange={(value) => handleSettingChange('language', value)}>
+                <Select value={settings.language} onValueChange={(value:string) => handleSettingChange('language', value)}>
                   <SelectTrigger className="rounded-xl">
                     <SelectValue />
                   </SelectTrigger>

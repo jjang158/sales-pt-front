@@ -1,3 +1,4 @@
+//화면 : 다크보드 or 라이드 모드 전환 
 import React from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { Button } from './ui/button';

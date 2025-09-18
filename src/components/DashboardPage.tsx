@@ -24,6 +24,7 @@ import { TodoItem } from '../lib/api';
 import type { Page } from '../types/index';
 
 
+//Hard Coding(중요 알림)
 const mockAlerts = [
   {
     id: '1',
@@ -137,18 +138,20 @@ export function DashboardPage({ onNavigate, onSelectCustomer, onStartRecording }
   });
 
   // 선택된 날짜의 todos 필터링
-  const scheduleEvents = useMemo(() => {
+  // scheduleEvents 생성 부분 수정
+const scheduleEvents = useMemo(() => {
   if (!todos || !Array.isArray(todos)) {
     return [];
   }
   
   return todos
     .filter(todo => {
-      if (!todo || !todo.due_date) return false;  // todo 객체 자체도 체크
+      if (!todo || !todo.due_date) return false;
       const todoDate = new Date(todo.due_date);
       return todoDate.toDateString() === selectedDate.toDateString();
     })
     .map(transformTodoToScheduleEvent)
+    .filter((event): event is NonNullable<typeof event> => event !== null) // null 제거
     .slice(0, 8);
 }, [todos, selectedDate]);
 
@@ -161,22 +164,6 @@ export function DashboardPage({ onNavigate, onSelectCustomer, onStartRecording }
     daysUntil: number;
     isToday: boolean;
   }> = [];
-
-  // for (let i = 0; i <= 30; i++) {
-  //   const checkDate = new Date(today);
-  //   checkDate.setDate(today.getDate() + i);
-  //   const monthDay = `${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-    
-  //   const birthdayCustomers = mockCustomers.filter(customer => customer.birthday === monthDay);
-    
-  //   birthdayCustomers.forEach(customer => {
-  //     upcoming.push({
-  //       ...customer,
-  //       daysUntil: i,
-  //       isToday: i === 0
-  //     });
-  //   });
-  // }
   
   return upcoming.slice(0, 4);
 }, []);
@@ -190,7 +177,7 @@ export function DashboardPage({ onNavigate, onSelectCustomer, onStartRecording }
     }
     
     const newCompletedStatus = !currentTodo.is_completed;
-    await toggleTodoComplete(todoId, newCompletedStatus);
+    await toggleTodoComplete(todoId);
     
     // Toast 알림
     if (newCompletedStatus) {
@@ -511,14 +498,14 @@ const isTodayOrFuture = (date: Date) => {
                               variant="destructive" 
                               size="sm" 
                               className="rounded-full p-2 w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e: React.MouseEvent<HTMLButtonElement>) => e.stopPropagation()}
                             >
                             <Plus className="w-4 h-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-44">
                           <DropdownMenuItem
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                               e.stopPropagation();
                               onStartRecording({
                               type: 'customer',
@@ -531,7 +518,7 @@ const isTodayOrFuture = (date: Date) => {
                            녹음
                         </DropdownMenuItem>
                          <DropdownMenuItem
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                               e.stopPropagation();
                               console.log('사진 촬영/필기인식:', event.customerName);
                              // TODO: 사진 촬영 기능 구현
@@ -541,7 +528,7 @@ const isTodayOrFuture = (date: Date) => {
                              사진
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={(e) => {
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                               e.stopPropagation();
                               console.log('텍스트 입력:', event.customerName);
                               // TODO: 텍스트 입력 모달 열기
@@ -840,7 +827,7 @@ const isTodayOrFuture = (date: Date) => {
               <Label htmlFor="priority">우선순위</Label>
               <Select 
                 value={editingEvent.priority} 
-                onValueChange={(value) => setEditingEvent(prev => ({ ...prev, priority: value as 'high' | 'medium' | 'low' }))}
+                onValueChange={(value : string) => setEditingEvent(prev => ({ ...prev, priority: value as 'high' | 'medium' | 'low' }))}
               >
                 <SelectTrigger className="rounded-xl">
                   <SelectValue placeholder="우선순위 선택" />
