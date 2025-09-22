@@ -5,6 +5,7 @@ import { ClientDetailPage } from '../customer/detail/ClientDetailPage';
 import { SettingsPage } from '../SettingsPage';
 import { ReviewPage } from '../review/ReviewPage';
 import { RecordPage } from '../record/RecordPage';
+import { DocumentsPage } from '../pages/DocumentsPage';
 import type { Page, RecordingContext } from '../../types/index';
 import { FloatingChatbot } from '../FloatingChatbot';
 
@@ -118,6 +119,9 @@ export const PageRouter = memo<PageRouterProps>(
 
       case 'settings':
         return <SettingsPage {...commonProps} />;
+
+      case 'documents':
+        return <DocumentsPage />;
 
       default:
         throw new Error(`Unknown page: ${currentPage}`);

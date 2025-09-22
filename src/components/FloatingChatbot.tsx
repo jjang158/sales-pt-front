@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MessageSquare, X, Settings, RotateCcw, Send, Mic, Paperclip, Clock, Maximize2, Minimize2, Loader2 } from 'lucide-react';
+import { MessageSquare, X, Settings, RotateCcw, Send, Mic, Paperclip, Clock, Maximize2, Minimize2, Loader2, Plus, Menu } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Badge } from './ui/badge';
+import { Card, CardHeader, CardTitle } from './ui/card';
+import { FileUpload } from './ui/file-upload';
 import { consultAPI, apiUtils, type ChatMessage, type ChatbotSource } from '../lib/api';
 import { ChevronDown, FileText } from 'lucide-react';
 
@@ -33,6 +33,8 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -219,6 +221,20 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
       }));
   }, [messages]);
 
+  // 파일 업로드 핸들러
+  const handleFileSelect = useCallback((files: File[]) => {
+    if (files.length > 0) {
+      const fileNames = files.map(f => f.name).join(', ');
+      const fileMessage = `📎 파일 업로드: ${fileNames}`;
+      setMessage(prev => prev ? `${prev}\n${fileMessage}` : fileMessage);
+    }
+  }, []);
+
+  // 파일 업로드 토글
+  const toggleFileUpload = useCallback(() => {
+    setShowFileUpload(!showFileUpload);
+  }, [showFileUpload]);
+
   // 메시지 전송
   const handleSendMessage = useCallback(async (messageText?: string) => {
     const textToSend = messageText || message.trim();
@@ -248,6 +264,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
     setMessages(prev => [...prev, userMessage, loadingMessage]);
     setMessage('');
+    setShowFileUpload(false);
     setIsLoading(true);
 
     try {
@@ -438,7 +455,7 @@ const renderMessage = (msg: Message) => (
         {/* 일반 모드 챗봇 패널 */}
         {isOpen && !isFullscreen && (
           <Card className="w-96 h-[600px] shadow-xl rounded-3xl border-border bg-card animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col page-container lg:w-[420px] lg:h-[640px]">
-            
+
             {/* 헤더 */}
             <CardHeader className="pb-3 border-b border-border shrink-0 rounded-t-3xl">
               <div className="flex items-center justify-between">
@@ -447,28 +464,28 @@ const renderMessage = (msg: Message) => (
                   <p className="text-xs text-muted-foreground">고객 정보 검색·상담 지원</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-8 h-8 rounded-xl hover:bg-muted transition-colors" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
                     aria-label="설정"
                     title="챗봇 설정"
                   >
                     <Settings className="w-4 h-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={resetChat}
-                    className="w-8 h-8 rounded-xl hover:bg-muted transition-colors" 
+                    className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
                     aria-label="대화 초기화"
                     title="새 대화 시작"
                   >
                     <RotateCcw className="w-4 h-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={toggleFullscreen}
                     className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
                     aria-label="전체화면으로 확대"
@@ -476,9 +493,9 @@ const renderMessage = (msg: Message) => (
                   >
                     <Maximize2 className="w-4 h-4" />
                   </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={toggleChat}
                     className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
                     aria-label="챗봇 닫기"
@@ -522,6 +539,19 @@ const renderMessage = (msg: Message) => (
                 </ScrollArea>
               </div>
 
+              {/* 파일 업로드 영역 */}
+              {showFileUpload && (
+                <div className="border-t border-border p-4 shrink-0 bg-muted/30">
+                  <FileUpload
+                    onFileSelect={handleFileSelect}
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                    multiple={true}
+                    maxSize={10}
+                    className="mb-0"
+                  />
+                </div>
+              )}
+
               {/* 입력 영역 */}
               <div className="border-t border-border p-4 shrink-0 bg-card rounded-b-3xl">
                 <div className="flex items-center gap-3">
@@ -537,32 +567,35 @@ const renderMessage = (msg: Message) => (
                       aria-label="메시지 입력"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         disabled={isLoading}
-                        className="w-7 h-7 p-0 rounded-full hover:bg-muted/80 transition-colors" 
+                        className="w-7 h-7 p-0 rounded-full hover:bg-muted/80 transition-colors"
                         aria-label="음성 입력"
                         title="음성 입력"
                       >
                         <Mic className="w-4 h-4 text-muted-foreground" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         disabled={isLoading}
-                        className="w-7 h-7 p-0 rounded-full hover:bg-muted/80 transition-colors" 
+                        onClick={toggleFileUpload}
+                        className={`w-7 h-7 p-0 rounded-full hover:bg-muted/80 transition-colors ${
+                          showFileUpload ? 'bg-primary/10 text-primary' : ''
+                        }`}
                         aria-label="파일 첨부"
                         title="파일 첨부"
                       >
-                        <Paperclip className="w-4 h-4 text-muted-foreground" />
+                        <Paperclip className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => handleSendMessage()}
                     disabled={!message.trim() || isLoading}
-                    size="sm" 
+                    size="sm"
                     className="rounded-2xl w-11 h-11 p-0 shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50"
                     aria-label="메시지 전송"
                     title="메시지 전송 (Enter)"
@@ -580,18 +613,259 @@ const renderMessage = (msg: Message) => (
         )}
       </div>
 
-      {/* 전체화면 모드 - 비슷한 구조로 업데이트 */}
+      {/* 전체화면 모드 */}
       {isOpen && isFullscreen && (
-        <div 
-          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" 
-          role="dialog" 
+        <div
+          className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+          role="dialog"
           aria-modal="true"
           aria-labelledby="fullscreen-chatbot-title"
         >
-          {/* 전체화면 내용은 유사하게 구현... */}
-        </div>
-      )}
-    </>
-  );
-}
+          <Card className="w-full h-full rounded-none shadow-none border-0 bg-background flex flex-col">
+
+            {/* 헤더 */}
+            <CardHeader className="pb-4 border-b border-border shrink-0 bg-background">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDrawer(true)}
+                    className="w-9 h-9 rounded-xl hover:bg-muted transition-colors"
+                    aria-label="대화 내역 보기"
+                    title="대화 내역 보기"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                  <div>
+                    <CardTitle id="fullscreen-chatbot-title" className="text-xl font-medium">
+                      AI 어시스턴트
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">고객 정보 검색·상담 지원</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-9 h-9 rounded-xl hover:bg-muted transition-colors"
+                    aria-label="설정"
+                    title="챗봇 설정"
+                  >
+                    <Settings className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetChat}
+                    className="w-9 h-9 rounded-xl hover:bg-muted transition-colors"
+                    aria-label="대화 초기화"
+                    title="새 대화 시작"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleFullscreen}
+                    className="w-9 h-9 rounded-xl hover:bg-muted transition-colors"
+                    aria-label="창 모드로 축소"
+                    title="창 모드로 축소"
+                  >
+                    <Minimize2 className="w-5 h-5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleChat}
+                    className="w-9 h-9 rounded-xl hover:bg-muted transition-colors"
+                    aria-label="챗봇 닫기"
+                    title="챗봇 닫기"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+
+            {/* 메인 채팅 영역 - 전체 너비 */}
+            <div className="flex-1 flex flex-col min-h-0">
+
+                {/* 대화 스크롤 영역 */}
+                <ScrollArea className="flex-1 p-6 scroll-container scrollbar-styled">
+                  <div className="max-w-4xl mx-auto space-y-6" role="log" aria-label="대화 내역">
+                    {messages.map(renderMessage)}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+
+                {/* 빠른 질문 버튼 */}
+                <div className="border-t border-border p-4 bg-background">
+                  <div className="max-w-4xl mx-auto">
+                    <p className="text-sm text-muted-foreground mb-3">빠른 질문:</p>
+                    <div className="flex flex-wrap gap-2" role="group" aria-label="빠른 질문 버튼">
+                      {faqPlaceholders.map((faq, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          disabled={isLoading}
+                          className="rounded-full text-sm hover:bg-accent transition-colors"
+                          onClick={() => handleSendMessage(faq)}
+                          aria-label={`빠른 질문: ${faq}`}
+                        >
+                          {faq}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 파일 업로드 영역 */}
+                {showFileUpload && (
+                  <div className="border-t border-border p-4 bg-muted/30">
+                    <div className="max-w-4xl mx-auto">
+                      <FileUpload
+                        onFileSelect={handleFileSelect}
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                        multiple={true}
+                        maxSize={10}
+                        className="mb-0"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 입력 영역 */}
+                <div className="border-t border-border p-4 bg-background">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 relative">
+                        <Input
+                          ref={inputRef}
+                          placeholder="메시지를 입력하세요..."
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          onKeyDown={handleKeyPress}
+                          disabled={isLoading}
+                          className="rounded-2xl pr-24 bg-input-background border-input h-12 shadow-sm transition-all duration-200 focus:shadow-md focus:ring-2 focus:ring-ring focus:ring-offset-2 text-base"
+                          aria-label="메시지 입력"
+                        />
+                        <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={isLoading}
+                            className="w-8 h-8 p-0 rounded-full hover:bg-muted/80 transition-colors"
+                            aria-label="음성 입력"
+                            title="음성 입력"
+                          >
+                            <Mic className="w-5 h-5 text-muted-foreground" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={isLoading}
+                            onClick={toggleFileUpload}
+                            className={`w-8 h-8 p-0 rounded-full hover:bg-muted/80 transition-colors ${
+                              showFileUpload ? 'bg-primary/10 text-primary' : ''
+                            }`}
+                            aria-label="파일 첨부"
+                            title="파일 첨부"
+                          >
+                            <Paperclip className="w-5 h-5" />
+                          </Button>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => handleSendMessage()}
+                        disabled={!message.trim() || isLoading}
+                        size="sm"
+                        className="rounded-2xl w-12 h-12 p-0 shadow-sm transition-all duration-200 hover:shadow-md disabled:opacity-50"
+                        aria-label="메시지 전송"
+                        title="메시지 전송 (Enter)"
+                      >
+                        {isLoading ? (
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                          <Send className="w-5 h-5" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* 드로워 - 대화 내역 */}
+            {showDrawer && (
+              <div
+                className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+                onClick={() => setShowDrawer(false)}
+              >
+                <div
+                  className="fixed left-0 top-0 h-full w-80 bg-background border-r border-border shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="p-4 border-b border-border">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-sm">최근 대화</h3>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowDrawer(false)}
+                        className="w-8 h-8 p-0"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full justify-start">
+                      <Plus className="w-4 h-4 mr-2" />
+                      새 대화 시작
+                    </Button>
+                  </div>
+
+                  <ScrollArea className="flex-1 p-2">
+                    <div className="space-y-2">
+                      {/* 대화 내역 예시 */}
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-auto p-3 text-left"
+                        onClick={() => setShowDrawer(false)}
+                      >
+                        <div>
+                          <p className="font-medium text-sm truncate">고객 정보 조회</p>
+                          <p className="text-xs text-muted-foreground">방금 전</p>
+                        </div>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-auto p-3 text-left"
+                        onClick={() => setShowDrawer(false)}
+                      >
+                        <div>
+                          <p className="font-medium text-sm truncate">상담 일정 확인</p>
+                          <p className="text-xs text-muted-foreground">1시간 전</p>
+                        </div>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-start h-auto p-3 text-left"
+                        onClick={() => setShowDrawer(false)}
+                      >
+                        <div>
+                          <p className="font-medium text-sm truncate">계약 현황 문의</p>
+                          <p className="text-xs text-muted-foreground">어제</p>
+                        </div>
+                      </Button>
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
 

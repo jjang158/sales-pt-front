@@ -1,6 +1,7 @@
 // 서버 IP 통신 기반 페이지
 import React, { useState, useMemo } from 'react';
 import { Calendar, CheckSquare, Mic, ChevronLeft, ChevronRight, Cake, Users, Plus, Clock, Save, X } from 'lucide-react';
+import { useIsMobile } from './ui/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -105,6 +106,7 @@ const transformTodoToScheduleEvent = (todo: TodoItem) => {
   };
 };
 export function DashboardPage({ onNavigate, onSelectCustomer, onStartRecording }: DashboardPageProps) {
+  const isMobile = useIsMobile();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [calendarDate, setCalendarDate] = useState<Date | undefined>(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
@@ -309,16 +311,22 @@ const isTodayOrFuture = (date: Date) => {
   }
 
   return (
-    <div className="h-full overflow-auto scrollbar-styled bg-gray-50/50">
-      <div className="pt-4 px-6 pb-6">
+    <div className="h-full overflow-auto scrollbar-styled bg-gray-50/50 dark:bg-gray-950/50 relative">
+      {/* 네비게이션 연결 효과 */}
+      <div className="absolute left-0 top-8 w-3 h-12 bg-gradient-to-r from-green-500/30 to-transparent rounded-r-full animate-pulse" />
+      <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
+      <div className={`pt-4 pb-6 ${isMobile ? 'px-4' : 'px-6'}`}>
 
         {/* Main Content with Side Panels - 70:30 비율로 변경 */}
-        <div className="grid gap-6 -mt-8" style={{ gridTemplateColumns: '7fr 3fr' }}>
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-4 -mt-4' : 'gap-6 -mt-8'}`} style={!isMobile ? { gridTemplateColumns: '7fr 3fr' } : {}}>
 
           {/* Left Column - 업무진행현황 + 업무리스트 (70% - 7/10) */}
-          <div className="space-y-6">
+          <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
             {/* 업무 진행 현황 */}
-            <Card className="rounded-2xl shadow-lg">
+            <Card className="rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 relative overflow-hidden">
+              {/* 카드 연결 효과 */}
+              <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-green-500 via-green-600 to-green-700 rounded-r-sm" />
+              <div className="absolute left-0 top-4 w-3 h-3 bg-orange-400 rounded-full shadow-lg animate-pulse" />
               <CardHeader className="!pt-1 !pb-1">
                 <CardTitle className="flex items-center gap-2">
                   <CheckSquare className="w-5" />
@@ -379,7 +387,10 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* 업무 리스트 */}
-            <Card className="rounded-2xl shadow-lg relative">
+            <Card className="rounded-2xl shadow-lg relative border-border/50 dark:border-border/20 dark:bg-card/50 overflow-hidden">
+              {/* 카드 연결 효과 */}
+              <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-r-sm" />
+              <div className="absolute left-0 top-4 w-3 h-3 bg-blue-400 rounded-full shadow-lg animate-pulse" />
               <CardHeader className="pb-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
@@ -387,8 +398,8 @@ const isTodayOrFuture = (date: Date) => {
                     업무 리스트 ({scheduleEvents.length})
                   </CardTitle>
 
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
+                  <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-3'}`}>
+                    <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-2'}`}>
                       <Button
                         variant="outline"
                         size="sm"
@@ -398,8 +409,8 @@ const isTodayOrFuture = (date: Date) => {
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div className="text-center min-w-[180px]">
-                        <p className="text-sm">{formatDate(selectedDate)}</p>
+                      <div className={`text-center ${isMobile ? 'min-w-[120px]' : 'min-w-[180px]'}`}>
+                        <p className={`${isMobile ? 'text-xs' : 'text-sm'}`}>{formatDate(selectedDate)}</p>
                         {isToday(selectedDate) && (
                           <p className="text-xs text-primary font-medium">오늘</p>
                         )}
@@ -414,15 +425,17 @@ const isTodayOrFuture = (date: Date) => {
                         <ChevronRight className="w-4 h-4" />
                       </Button>
 
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedDate(new Date())} // 현재 날짜로 설정
-                        className="rounded-xl text-xs"
-                        disabled={isToday(selectedDate)}
-                      >
-                        오늘로
-                      </Button>
+                      {!isMobile && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedDate(new Date())} // 현재 날짜로 설정
+                          className="rounded-xl text-xs"
+                          disabled={isToday(selectedDate)}
+                        >
+                          오늘로
+                        </Button>
+                      )}
 
                       <Button
                         variant="outline"
@@ -431,7 +444,7 @@ const isTodayOrFuture = (date: Date) => {
                         className="rounded-xl"
                       >
                         <Calendar className="w-4 h-4 mr-1" />
-                        달력
+                        {!isMobile && '달력'}
                       </Button>
                     </div>
                   </div>
@@ -574,9 +587,9 @@ const isTodayOrFuture = (date: Date) => {
           </div>
 
           {/* Right Column - 영업단계별현황 + AI추천 + 중요알림 (30% - 3/10) */}
-          <div className="space-y-6">
+          <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
             {/* 영업 단계별 현황 */}
-            <Card className="rounded-2xl shadow-lg">
+            <Card className="rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">
                   영업 단계별 현황
@@ -659,7 +672,7 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* AI 추천 */}
-            <Card className="rounded-2xl shadow-lg bg-gradient-to-br from-purple-500 to-fuchsia-500">
+            <Card className="rounded-2xl shadow-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 dark:from-purple-600 dark:to-fuchsia-600 border-0">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2 text-white">
                   <CheckSquare className="w-4 h-4" />
@@ -702,7 +715,7 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* 중요 알림 */}
-            <Card className="rounded-2xl shadow-lg">
+            <Card className="rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <CheckSquare className="w-4 h-4" />
