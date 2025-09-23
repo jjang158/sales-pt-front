@@ -1,17 +1,21 @@
 import React, { memo } from 'react';
 import { Bell, ChevronDown } from 'lucide-react';
+import { useIsMobile } from '../ui/use-mobile';
 
 /**
  * Clean, accessible application header
  */
-export const AppHeader = memo(() => (
-  //서비스 명 색 변경 (그라데이션-그린 > 검은색 단색)
-  <header className="bg-card/95 dark:bg-card/50 backdrop-blur-sm border-b border-border/50 dark:border-border/20 px-6 py-4 flex items-center justify-between safe-area-left safe-area-right avoid-camera">
-   <h1 
-  className="font-semibold select-none text-black dark:text-white"
+export const AppHeader = memo(() => {
+  const isMobile = useIsMobile();
+
+  return (
+    //서비스 명 색 변경 (그라데이션-그린 > 검은색 단색)
+    <header className={`bg-card/95 dark:bg-card/50 backdrop-blur-sm border-b border-border/50 dark:border-border/20 px-6 flex items-center justify-between safe-area-left safe-area-right ${isMobile ? 'py-2' : 'py-4'}`}>
+   <h1
+  className="font-bold select-none text-black dark:text-white text-2xl"
   style={{
-    fontFamily: '"리아체", "Riache", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif',
-    fontSize: '1.5rem'
+    fontFamily: 'RiaSans, "리아체", "Riache", var(--font-riache), sans-serif',
+    fontWeight: 700,
   }}
 >
   샐러리
@@ -44,4 +48,5 @@ export const AppHeader = memo(() => (
       </div>
     </div>
   </header>
-));
+  );
+});

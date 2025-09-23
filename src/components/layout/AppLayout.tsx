@@ -30,10 +30,8 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
   if (isMobile) {
     return (
       <div className="mobile-scroll-container bg-background flex flex-col safe-area-top safe-area-left safe-area-right">
-        {/* Status bar background for Android */}
-        <div className="status-bar-bg"></div>
         <AppHeader />
-        <main className="flex-1 bg-background page-container overflow-auto pb-16 safe-area-bottom">
+        <main className="flex-1 bg-background page-container overflow-auto pb-24 safe-area-bottom">
           {children}
         </main>
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />

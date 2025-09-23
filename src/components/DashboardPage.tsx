@@ -136,7 +136,10 @@ export function DashboardPage({ onNavigate, onSelectCustomer, onStartRecording }
   } = useTodoList({
     autoLoad: true,
     //defaultParams: { customer_id: 101 },
-    onError: (error) => console.error('Todo 로딩 에러:', error)
+    onError: (error) => {
+      console.warn('Todo 로딩 중 문제 발생:', error);
+      // 에러를 조용히 처리하고 기본 데이터로 진행
+    }
   });
 
   // 선택된 날짜의 todos 필터링
@@ -311,7 +314,7 @@ const isTodayOrFuture = (date: Date) => {
   }
 
   return (
-    <div className="h-full overflow-auto scrollbar-styled bg-gray-50/50 dark:bg-gray-950/50 relative">
+    <div className={`h-full overflow-auto scrollbar-styled bg-gray-50/50 dark:bg-gray-950/50 relative ${isMobile ? 'pb-8' : ''}`}>
       {/* 네비게이션 연결 효과 */}
       <div className="absolute left-0 top-8 w-3 h-12 bg-gradient-to-r from-green-500/30 to-transparent rounded-r-full animate-pulse" />
       <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
@@ -323,7 +326,7 @@ const isTodayOrFuture = (date: Date) => {
           {/* Left Column - 업무진행현황 + 업무리스트 (70% - 7/10) */}
           <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
             {/* 업무 진행 현황 */}
-            <Card className="rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 relative overflow-hidden">
+            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 relative overflow-hidden ${isMobile ? 'mobile-card-compact' : ''}`}>
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-green-500 via-green-600 to-green-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-orange-400 rounded-full shadow-lg animate-pulse" />
@@ -334,10 +337,10 @@ const isTodayOrFuture = (date: Date) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className={`grid gap-6 ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2'}`}>
                   {/* DO (할 일) */}
                   <button
-                    className="text-left p-6 bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group"
+                    className={`text-left bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-6'}`}
                     onClick={() => handleStageClick('DO')}
                   >
                     <div className="flex items-center justify-between mb-4">
@@ -361,7 +364,7 @@ const isTodayOrFuture = (date: Date) => {
 
                   {/* DONE (완료) */}
                   <button
-                    className="text-left p-6 bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group"
+                    className={`text-left bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-6'}`}
                     onClick={() => handleStageClick('DONE')}
                   >
                     <div className="flex items-center justify-between mb-4">
@@ -387,7 +390,7 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* 업무 리스트 */}
-            <Card className="rounded-2xl shadow-lg relative border-border/50 dark:border-border/20 dark:bg-card/50 overflow-hidden">
+            <Card className={`rounded-2xl shadow-lg relative border-border/50 dark:border-border/20 dark:bg-card/50 overflow-hidden ${isMobile ? 'mobile-card-compact' : ''}`}>
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-blue-400 rounded-full shadow-lg animate-pulse" />
@@ -450,7 +453,7 @@ const isTodayOrFuture = (date: Date) => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 max-h-96 overflow-y-auto scrollbar-styled">
+              <CardContent className={`space-y-3 overflow-y-auto scrollbar-styled ${isMobile ? 'mobile-card-content' : 'max-h-96'}`}>
                 {isLoading ? (
                   <div className="text-center py-8">
                     <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
@@ -589,13 +592,13 @@ const isTodayOrFuture = (date: Date) => {
           {/* Right Column - 영업단계별현황 + AI추천 + 중요알림 (30% - 3/10) */}
           <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
             {/* 영업 단계별 현황 */}
-            <Card className="rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50">
+            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 ${isMobile ? 'mobile-card-small' : ''}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">
                   영업 단계별 현황
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className={`space-y-4 ${isMobile ? 'mobile-card-content-small' : ''}`}>
                 {/* 신규문의 */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -672,14 +675,14 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* AI 추천 */}
-            <Card className="rounded-2xl shadow-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 dark:from-purple-600 dark:to-fuchsia-600 border-0">
+            <Card className={`rounded-2xl shadow-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 dark:from-purple-600 dark:to-fuchsia-600 border-0 ${isMobile ? 'mobile-card-small' : ''}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2 text-white">
                   <CheckSquare className="w-4 h-4" />
                   AI 추천
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className={`space-y-2 ${isMobile ? 'mobile-card-content-small' : ''}`}>
                 <div className="space-y-2">
                   {overdueTodos.length > 0 && (
                     <div className="flex items-start gap-2 p-2 rounded-lg bg-white/70 dark:bg-black/20 hover:bg-white/90 dark:hover:bg-black/30 transition-colors cursor-pointer">
@@ -715,14 +718,14 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* 중요 알림 */}
-            <Card className="rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50">
+            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 ${isMobile ? 'mobile-card-small' : ''}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <CheckSquare className="w-4 h-4" />
                   중요 알림
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className={`space-y-3 ${isMobile ? 'mobile-card-content-small' : ''}`}>
                 {mockAlerts.map((alert) => {
                   const getAlertIcon = (type: string) => {
                     switch (type) {
