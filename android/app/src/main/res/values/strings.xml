@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Celery Sales PT</string>
-    <string name="title_activity_main">Celery Sales PT</string>
+    <string name="app_name">Celery</string>
+    <string name="title_activity_main">Celery</string>
     <string name="package_name">com.celery.salespt</string>
     <string name="custom_url_scheme">com.celery.salespt</string>
 </resources>

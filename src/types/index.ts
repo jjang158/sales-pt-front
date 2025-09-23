@@ -1,4 +1,12 @@
-export type Page = 'chatbot'|'dashboard' | 'client-detail' | 'settings' | 'review' | 'record' | 'integrated-customer' | 'documents';
+export type Page = 'login' | 'chatbot'|'dashboard' | 'client-detail' | 'settings' | 'review' | 'record' | 'integrated-customer' | 'documents';
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  avatar: string;
+  role: 'admin' | 'sales' | 'manager';
+}
 
 export interface RecordingContext {
   type: 'task' | 'customer';

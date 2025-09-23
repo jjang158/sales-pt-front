@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.celery.salespt',
-  appName: 'Celery Sales PT',
+  appName: 'Celery',
   webDir: 'build'
 };
 
