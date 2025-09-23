@@ -1,5 +1,4 @@
-import React from 'react';
-import { Home, Settings, Users, Leaf, FileText } from 'lucide-react';
+import { Home, Settings, Users, FileText } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { ThemeToggle } from './ThemeToggle';
@@ -23,8 +22,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   if (isMobile) {
     return (
       <nav className="fixed bottom-0 left-0 right-0 bg-green-500 dark:bg-green-700 backdrop-blur-md border-t border-green-400 dark:border-green-600 z-50">
-        <div className="flex justify-center items-center py-2 px-4 w-full">
-          <div className="flex justify-around items-center w-full max-w-md mx-auto">
+        <div className="flex items-center justify-between px-4 py-2 w-full max-w-md mx-auto">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -76,7 +74,6 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-md" />
               )}
             </Button>
-          </div>
           </div>
         </div>
       </nav>
