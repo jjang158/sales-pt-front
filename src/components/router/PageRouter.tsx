@@ -6,7 +6,8 @@ import { SettingsPage } from '../SettingsPage';
 import { ReviewPage } from '../review/ReviewPage';
 import { RecordPage } from '../pages/RecordPage';
 import { DocumentsPage } from '../pages/DocumentsPage';
-import type { Page, RecordingContext } from '../../types/index';
+import { LoginPage } from '../pages/LoginPage';
+import type { Page, RecordingContext, User } from '../../types/index';
 import { FloatingChatbot } from '../FloatingChatbot';
 
 interface PageRouterProps {
@@ -33,6 +34,8 @@ interface PageRouterProps {
   readonly navigateTo: (page: Page, data?: any) => void;
   readonly selectCustomer: (customerId: string) => void;
   readonly startRecording: (context: RecordingContext) => void;
+  readonly login: (user: User) => void;
+  readonly logout: () => void;
 }
 
 const PAGES = {

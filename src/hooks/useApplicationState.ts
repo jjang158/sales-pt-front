@@ -1,10 +1,11 @@
 import { useMemo, useReducer } from 'react';
-import type { Page, RecordingContext } from '../types/index';
+import type { Page, RecordingContext, User } from '../types/index';
 
 interface ApplicationState {
   readonly currentPage: Page;
   readonly selectedCustomerId: string | null;
   readonly recordingContext: RecordingContext | null;
+  readonly user: User | null;
   
   // 🔥 STT 결과 저장
   readonly sttResult: {
@@ -32,7 +33,9 @@ type StateAction =
   | { type: 'NAVIGATE_WITH_DATA'; payload: { page: Page; data: any } }
   | { type: 'SELECT_CUSTOMER'; payload: { customerId: string } }
   | { type: 'START_RECORDING'; payload: { context: RecordingContext } }
-  | { type: 'FINISH_RECORDING'; payload: { transcript: string; consultationData: any; aiInsights: any } };
+  | { type: 'FINISH_RECORDING'; payload: { transcript: string; consultationData: any; aiInsights: any } }
+  | { type: 'LOGIN'; payload: { user: User } }
+  | { type: 'LOGOUT' };
 
 const reducer = (state: ApplicationState, action: StateAction): ApplicationState => {
   switch (action.type) {
@@ -91,16 +94,30 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
         sttResult: action.payload,
         recordingData: null,
       };
-      
+
+    case 'LOGIN':
+      return {
+        ...state,
+        currentPage: 'dashboard',
+        user: action.payload.user,
+      };
+
+    case 'LOGOUT':
+      return {
+        ...initialState,
+        currentPage: 'login',
+      };
+
     default:
       return state;
   }
 };
 
 const initialState: ApplicationState = {
-  currentPage: 'dashboard',
+  currentPage: 'login',
   selectedCustomerId: null,
   recordingContext: null,
+  user: null,
   sttResult: null,
   recordingData: null, // 🔥 초기값 추가
 };
@@ -134,6 +151,10 @@ export const useApplicationState = () => {
         consultationData: any;
         aiInsights: any;
       }) => dispatch({ type: 'FINISH_RECORDING', payload: result }),
+
+      // 🔥 로그인/로그아웃
+      login: (user: User) => dispatch({ type: 'LOGIN', payload: { user } }),
+      logout: () => dispatch({ type: 'LOGOUT' }),
     }),
     []
   );
