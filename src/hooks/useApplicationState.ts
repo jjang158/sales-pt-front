@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from 'react';
+import { useReducer, useMemo } from 'react';
 import type { Page, RecordingContext, User } from '../types/index';
 
 interface ApplicationState {
@@ -7,14 +7,12 @@ interface ApplicationState {
   readonly recordingContext: RecordingContext | null;
   readonly user: User | null;
   
-  // 🔥 STT 결과 저장
   readonly sttResult: {
     transcript: string;
     consultationData: any;
     aiInsights: any;
   } | null;
-  
-  // 🔥 새로 추가: RecordPage에서 전달된 데이터
+
   readonly recordingData: {
     recordedText: string;
     context: any;
@@ -45,7 +43,6 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
         currentPage: action.payload,
         selectedCustomerId: action.payload === 'client-detail' ? state.selectedCustomerId : null,
         recordingContext: action.payload === 'record' ? state.recordingContext : null,
-        // review 페이지가 아니면 recordingData 초기화
         recordingData: action.payload === 'review' ? state.recordingData : null,
       };
       
@@ -96,7 +93,6 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
       };
 
     case 'LOGIN':
-      // localStorage에 사용자 정보 저장
       localStorage.setItem('user', JSON.stringify(action.payload.user));
       return {
         ...state,
@@ -105,7 +101,6 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
       };
 
     case 'LOGOUT':
-      // localStorage에서 사용자 정보 제거
       localStorage.removeItem('user');
       return {
         ...getInitialState(),
@@ -118,45 +113,44 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
 };
 
 const getInitialState = (): ApplicationState => {
-  // 저장된 사용자 정보가 있는지 확인
-  const savedUser = localStorage.getItem('user');
-  if (savedUser) {
-    try {
-      const user = JSON.parse(savedUser);
-      return {
-        currentPage: 'dashboard',
-        selectedCustomerId: null,
-        recordingContext: null,
-        user: user,
-        sttResult: null,
-        recordingData: null,
-      };
-    } catch (error) {
-      // localStorage에 잘못된 데이터가 있으면 제거
-      localStorage.removeItem('user');
-    }
-  }
-
-  // 로그인되지 않은 경우 로그인 페이지로
-  return {
-    currentPage: 'login',
+  const defaultState = {
+    currentPage: 'login' as Page,
     selectedCustomerId: null,
     recordingContext: null,
     user: null,
     sttResult: null,
     recordingData: null,
   };
+
+  if (typeof window === 'undefined') {
+    return defaultState;
+  }
+
+  try {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      return {
+        ...defaultState,
+        currentPage: 'dashboard',
+        user,
+      };
+    }
+  } catch (error) {
+    localStorage.removeItem('user');
+    if (import.meta.env.DEV) {
+      console.warn('localStorage에서 잘못된 사용자 데이터 제거:', error);
+    }
+  }
+
+  return defaultState;
 };
 
-/**
- * Type-safe application state with auto-cleanup
- */
 export const useApplicationState = () => {
   const [state, dispatch] = useReducer(reducer, getInitialState());
 
   const actions = useMemo(
     () => ({
-      // 🔥 기존 navigateTo - 데이터 없이 페이지만 이동
       navigateTo: (page: Page, data?: any) => {
         if (data) {
           dispatch({ type: 'NAVIGATE_WITH_DATA', payload: { page, data } });
@@ -171,14 +165,12 @@ export const useApplicationState = () => {
       startRecording: (context: RecordingContext) =>
         dispatch({ type: 'START_RECORDING', payload: { context } }),
 
-      // 🔥 STT 완료 후 결과 저장 + review 이동
       finishRecording: (result: {
         transcript: string;
         consultationData: any;
         aiInsights: any;
       }) => dispatch({ type: 'FINISH_RECORDING', payload: result }),
 
-      // 🔥 로그인/로그아웃
       login: (user: User) => dispatch({ type: 'LOGIN', payload: { user } }),
       logout: () => dispatch({ type: 'LOGOUT' }),
     }),

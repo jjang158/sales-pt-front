@@ -1,6 +1,5 @@
-// 서버 IP 통신 기반 페이지
 import React, { useState, useMemo } from 'react';
-import { Calendar, CheckSquare, Mic, ChevronLeft, ChevronRight, Cake, Users, Plus, Clock, Save, X } from 'lucide-react';
+import { Calendar, CheckSquare, Mic, ChevronLeft, ChevronRight, Cake, Plus, Clock, Save, X, Edit, FileText } from 'lucide-react';
 import { useIsMobile } from './ui/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -15,23 +14,19 @@ import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Edit, FileText } from 'lucide-react'; // 추가 아이콘들
 import toast from 'react-hot-toast';
-
-
-// API 통합 - mock 데이터 대신 실제 API 사용
 import { useTodoList } from '../hooks/useTodoList';
 import { TodoItem } from '../lib/api';
+import { AIInsightsWidget } from './features/AIInsightsWidget';
 import type { Page } from '../types/index';
 
 
-//Hard Coding(중요 알림)
 const mockAlerts = [
   {
     id: '1',
     type: 'birthday',
-    title: 'Sarah Johnson 생일',
-    description: '내일이 생일입니다',
+    title: '김민수님 생일',
+    description: '내일이 생일입니다 - 축하 메시지 전송',
     customerId: '1',
     badgeText: '내일',
     iconColor: 'text-pink-600',
@@ -41,12 +36,23 @@ const mockAlerts = [
   {
     id: '2',
     type: 'follow-up',
-    title: '보험 갱신 안내',
-    description: 'Michael Chen 자동차보험 만료 예정',
+    title: '보험 갱신 알림',
+    description: '이지영님 종신보험 만료 예정',
     customerId: '2',
     badgeText: '3일 후',
     iconColor: 'text-orange-600',
     badgeColor: 'bg-orange-100 text-orange-800',
+    priority: 'high' as const
+  },
+  {
+    id: '3',
+    type: 'contract',
+    title: '계약 진행 현황',
+    description: '박준혁님 자동차보험 청약서 검토 필요',
+    customerId: '3',
+    badgeText: '진행중',
+    iconColor: 'text-blue-600',
+    badgeColor: 'bg-blue-100 text-blue-800',
     priority: 'high' as const
   }
 ];
@@ -203,6 +209,15 @@ const scheduleEvents = useMemo(() => {
 
   // 날짜 관련 함수들 (기존 유지)
   function formatDate(date: Date) {
+    if (isMobile) {
+      const dateStr = date.toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).replace(/\./g, '-').replace(/\s/g, '').replace(/-$/, '');
+      const weekday = date.toLocaleDateString('ko-KR', { weekday: 'short' });
+      return `${dateStr}(${weekday})`;
+    }
     return date.toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
@@ -314,11 +329,15 @@ const isTodayOrFuture = (date: Date) => {
   }
 
   return (
-    <div className={`h-full overflow-auto scrollbar-styled bg-gray-50/50 dark:bg-gray-950/50 relative ${isMobile ? 'pb-8' : ''}`}>
-      {/* 네비게이션 연결 효과 */}
-      <div className="absolute left-0 top-8 w-3 h-12 bg-gradient-to-r from-green-500/30 to-transparent rounded-r-full animate-pulse" />
-      <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
-      <div className={`pt-4 pb-6 ${isMobile ? 'px-4' : 'px-6'}`}>
+    <div className={`h-full overflow-auto scrollbar-styled relative`}>
+      {/* 네비게이션 연결 효과 - 데스크톱만 */}
+      {!isMobile && (
+        <>
+          <div className="absolute left-0 top-8 w-3 h-12 bg-gradient-to-r from-green-500/30 to-transparent rounded-r-full animate-pulse" />
+          <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
+        </>
+      )}
+      <div className={`${isMobile ? 'pt-6 pb-6 px-4' : 'pt-4 pb-6 px-6'}`}>
 
         {/* Main Content with Side Panels - 70:30 비율로 변경 */}
         <div className={`grid ${isMobile ? 'grid-cols-1 gap-4 -mt-4' : 'gap-6 -mt-8'}`} style={!isMobile ? { gridTemplateColumns: '7fr 3fr' } : {}}>
@@ -340,49 +359,53 @@ const isTodayOrFuture = (date: Date) => {
                 <div className={`grid gap-6 ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2'}`}>
                   {/* DO (할 일) */}
                   <button
-                    className={`text-left bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-6'}`}
+                    className={`${isMobile ? '' : 'text-left'} bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-2.5' : 'p-6'}`}
                     onClick={() => handleStageClick('DO')}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-white" />
+                    <div className={`flex items-center ${isMobile ? 'justify-center gap-2 mb-1' : 'justify-between mb-4'}`}>
+                      <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-orange-500 rounded-full flex items-center justify-center`}>
+                        <Clock className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-orange-700 dark:text-orange-400">
+                      <div className={isMobile ? 'text-center' : 'text-right'}>
+                        <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>
                           {stats.incomplete}
                         </p>
-                        <p className="text-xs text-orange-600 dark:text-orange-500">개</p>
+                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-orange-600 dark:text-orange-500`}>개</p>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-orange-800 dark:text-orange-300 mb-1">할 일 (DO)</h3>
-                      <p className="text-sm text-orange-600 dark:text-orange-400">
-                        진행해야 할 업무들
-                      </p>
+                    <div className={isMobile ? 'text-center' : ''}>
+                      <h3 className={`font-semibold text-orange-800 dark:text-orange-300 ${isMobile ? 'text-xs' : 'mb-1 text-lg'}`}>할 일 (DO)</h3>
+                      {!isMobile && (
+                        <p className="text-base text-orange-600 dark:text-orange-400">
+                          진행해야 할 업무들
+                        </p>
+                      )}
                     </div>
                   </button>
 
                   {/* DONE (완료) */}
                   <button
-                    className={`text-left bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-6'}`}
+                    className={`${isMobile ? '' : 'text-left'} bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-2.5' : 'p-6'}`}
                     onClick={() => handleStageClick('DONE')}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                        <CheckSquare className="w-5 h-5 text-white" />
+                    <div className={`flex items-center ${isMobile ? 'justify-center gap-2 mb-1' : 'justify-between mb-4'}`}>
+                      <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-green-500 rounded-full flex items-center justify-center`}>
+                        <CheckSquare className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
                       </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+                      <div className={isMobile ? 'text-center' : 'text-right'}>
+                        <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>
                           {stats.completed}
                         </p>
-                        <p className="text-xs text-green-600 dark:text-green-500">개</p>
+                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-green-600 dark:text-green-500`}>개</p>
                       </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-green-800 dark:text-green-300 mb-1">완료 (DONE)</h3>
-                      <p className="text-sm text-green-600 dark:text-green-400">
-                        완료된 업무들
-                      </p>
+                    <div className={isMobile ? 'text-center' : ''}>
+                      <h3 className={`font-semibold text-green-800 dark:text-green-300 ${isMobile ? 'text-xs' : 'mb-1 text-lg'}`}>완료 (DONE)</h3>
+                      {!isMobile && (
+                        <p className="text-base text-green-600 dark:text-green-400">
+                          완료된 업무들
+                        </p>
+                      )}
                     </div>
                   </button>
                 </div>
@@ -390,7 +413,7 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* 업무 리스트 */}
-            <Card className={`rounded-2xl shadow-lg relative border-border/50 dark:border-border/20 dark:bg-card/50 overflow-hidden ${isMobile ? 'mobile-card-compact' : ''}`}>
+            <Card className={`rounded-2xl shadow-lg relative border-border/50 dark:border-border/20 dark:bg-card/50 overflow-visible ${isMobile ? 'mobile-card-compact' : ''}`}>
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-blue-400 rounded-full shadow-lg animate-pulse" />
@@ -398,7 +421,7 @@ const isTodayOrFuture = (date: Date) => {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="w-5 h-5" />
-                    업무 리스트 ({scheduleEvents.length})
+                    {isMobile ? `업무 (${scheduleEvents.length})` : `업무 리스트 (${scheduleEvents.length})`}
                   </CardTitle>
 
                   <div className={`flex items-center ${isMobile ? 'gap-2' : 'gap-3'}`}>
@@ -412,8 +435,8 @@ const isTodayOrFuture = (date: Date) => {
                         <ChevronLeft className="w-4 h-4" />
                       </Button>
 
-                      <div className={`text-center ${isMobile ? 'min-w-[120px]' : 'min-w-[180px]'}`}>
-                        <p className={`${isMobile ? 'text-xs' : 'text-sm'}`}>{formatDate(selectedDate)}</p>
+                      <div className={`text-center ${isMobile ? 'min-w-[140px]' : 'min-w-[180px]'}`}>
+                        <p className={`${isMobile ? 'text-xs font-medium' : 'text-sm'}`}>{formatDate(selectedDate)}</p>
                         {isToday(selectedDate) && (
                           <p className="text-xs text-primary font-medium">오늘</p>
                         )}
@@ -467,13 +490,15 @@ const isTodayOrFuture = (date: Date) => {
                     return (
                       <div
                         key={event.id}
-                        className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group"
+                        className={`flex ${isMobile ? 'items-start' : 'items-center'} gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group`}
                       >
-                        <Checkbox
-                          className="w-5 h-5"
-                          checked={todo.is_completed}
-                          onCheckedChange={() => handleToggleComplete(todo.id)}
-                        />
+                        <div className={isMobile ? 'pt-0.5' : ''}>
+                          <Checkbox
+                            className="w-5 h-5"
+                            checked={todo.is_completed}
+                            onCheckedChange={() => handleToggleComplete(todo.id)}
+                          />
+                        </div>
 
                         <div className="flex-1 cursor-pointer hover:bg-muted/30 p-2 rounded-lg transition-colors"
                              onClick={(e) => {
@@ -487,21 +512,23 @@ const isTodayOrFuture = (date: Date) => {
                                  customerName: event.customerName
                                });
                              }}>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className={`font-medium ${todo.is_completed ? 'line-through text-muted-foreground' : ''}`}>
+                          <div className={`flex ${isMobile ? 'flex-col gap-1' : 'items-center gap-2'} mb-1`}>
+                            <h4 className={`font-medium ${isMobile ? 'text-xs leading-snug' : 'text-lg'} ${todo.is_completed ? 'line-through text-muted-foreground' : ''}`}>
                               {event.title}
                             </h4>
-                            <Badge variant="outline" className={`rounded-full text-xs ${getPriorityBadgeColor(event.priority)}`}>
-                              {getPriorityText(event.priority)}
-                            </Badge>
-                            {todo.is_completed && (
-                              <Badge variant="secondary" className="rounded-full text-xs">
-                                완료
+                            <div className={`flex gap-1 ${isMobile ? '' : 'items-center'}`}>
+                              <Badge variant="outline" className={`rounded-full ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-sm px-2 py-1'} ${getPriorityBadgeColor(event.priority)}`}>
+                                {getPriorityText(event.priority)}
                               </Badge>
-                            )}
+                              {todo.is_completed && (
+                                <Badge variant="secondary" className={`rounded-full ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-sm px-2 py-1'}`}>
+                                  완료
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{event.description}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <p className={`${isMobile ? 'text-[11px] leading-relaxed' : 'text-base'} text-muted-foreground`}>{event.description}</p>
+                          <div className={`flex items-center gap-2 ${isMobile ? 'text-[10px] mt-1' : 'text-sm'} text-muted-foreground`}>
                             <span>{formatTime(event.time)}</span>
                             <span>•</span>
                             <span>{event.customerName}</span>
@@ -567,25 +594,23 @@ const isTodayOrFuture = (date: Date) => {
                 )}
               </CardContent>
 
-              {/* Floating Add Todo Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                className={`absolute bottom-4 right-4 w-10 h-10 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow z-10 bg-background border-2 ${
-                !isTodayOrFuture(selectedDate) ? 'opacity-50 cursor-not-allowed' : ''
-                }`
-              }
+              {/* Floating Add Todo Button - Exact format as requested */}
+              <button
+                data-slot="button"
+                className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 gap-1.5 has-[>svg]:px-2.5 absolute bottom-4 right-4 w-10 h-10 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow z-10 bg-background border-2"
+                title="새 할 일 추가"
                 disabled={!isTodayOrFuture(selectedDate)}
                 onClick={() => {
                   if (isTodayOrFuture(selectedDate)) {
                     console.log('새 할 일 추가 - 날짜:', selectedDate);
                   }
-                }
-              }
-              title={!isTodayOrFuture(selectedDate) ? '과거 날짜에는 할 일을 추가할 수 없습니다' : '새 할 일 추가'}
+                }}
               >
-              <Plus className="w-4 h-4" />
-            </Button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus w-4 h-4">
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5v14"></path>
+                </svg>
+              </button>
             </Card>
           </div>
 
@@ -674,48 +699,11 @@ const isTodayOrFuture = (date: Date) => {
               </CardContent>
             </Card>
 
-            {/* AI 추천 */}
-            <Card className={`rounded-2xl shadow-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 dark:from-purple-600 dark:to-fuchsia-600 border-0 ${isMobile ? 'mobile-card-small' : ''}`}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2 text-white">
-                  <CheckSquare className="w-4 h-4" />
-                  AI 추천
-                </CardTitle>
-              </CardHeader>
-              <CardContent className={`space-y-2 ${isMobile ? 'mobile-card-content-small' : ''}`}>
-                <div className="space-y-2">
-                  {overdueTodos.length > 0 && (
-                    <div className="flex items-start gap-2 p-2 rounded-lg bg-white/70 dark:bg-black/20 hover:bg-white/90 dark:hover:bg-black/30 transition-colors cursor-pointer">
-                      <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-white text-xs font-medium">!</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-purple-900 dark:text-purple-100 leading-tight">
-                        오늘의 아이스 브레이킹
-                        </div>
-                        <div className="text-xs text-purple-700 dark:text-purple-300 leading-tight mt-0.5">
-                          오늘따라 화사하신 거 같아요! 덕분에 분위기가 환해졌어요~
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="flex items-start gap-2 p-2 rounded-lg bg-white/70 dark:bg-black/20 hover:bg-white/90 dark:hover:bg-black/30 transition-colors cursor-pointer">
-                    <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-white text-xs font-medium">1</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-medium text-purple-900 dark:text-purple-100 leading-tight">
-                        전화 상담 팁
-                      </div>
-                      <div className="text-xs text-purple-700 dark:text-purple-300 leading-tight mt-0.5">
-                        목소리 톤을 평소보다 10% 높이고 미소 지으며 통화
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* AI 영업 도우미 */}
+            <AIInsightsWidget
+              overdueTodos={overdueTodos}
+              isMobile={isMobile}
+            />
 
             {/* 중요 알림 */}
             <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 ${isMobile ? 'mobile-card-small' : ''}`}>

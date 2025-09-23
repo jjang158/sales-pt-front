@@ -29,9 +29,9 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
 
   if (isMobile) {
     return (
-      <div className="mobile-scroll-container bg-background flex flex-col safe-area-top safe-area-left safe-area-right">
+      <div className="md:hidden h-screen bg-background flex flex-col safe-area-inset">
         <AppHeader />
-        <main className="flex-1 bg-background page-container overflow-auto pb-24 safe-area-bottom">
+        <main className="flex-1 bg-background/50 page-container overflow-auto" style={{ paddingBottom: '4rem' }}>
           {children}
         </main>
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />
@@ -40,7 +40,7 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
   }
 
   return (
-    <div className="h-screen bg-background p-6 transition-colors duration-300">
+    <div className="hidden md:block h-screen bg-background p-6 transition-colors duration-300">
       <div className="h-full bg-card rounded-3xl shadow-xl border border-border/50 flex overflow-hidden relative">
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />
         <div className="flex-1 flex flex-col min-h-0">

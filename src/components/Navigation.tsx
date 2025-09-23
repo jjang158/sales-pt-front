@@ -14,16 +14,22 @@ const navigationItems = [
   { id: 'dashboard' as Page, icon: Home, label: '대시보드' },
   { id: 'integrated-customer' as Page, icon: Users, label: '통합 고객 관리' },
   { id: 'documents' as Page, icon: FileText, label: '문서 관리' },
+  { id: 'settings' as Page, icon: Settings, label: '설정' },
 ];
 
 export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   const isMobile = useIsMobile();
 
+  // 디버깅: 모바일 감지 상태 확인
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Navigation - isMobile:', isMobile, 'window.innerWidth:', typeof window !== 'undefined' ? window.innerWidth : 'undefined');
+  }
+
   if (isMobile) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 bg-green-500 dark:bg-green-700 backdrop-blur-md border-t border-green-400 dark:border-green-600 z-50 safe-area-bottom safe-area-left safe-area-right">
-        <div className="flex items-center justify-between px-4 py-2 w-full max-w-md mx-auto">
-          {navigationItems.map((item) => {
+      <nav className="md:hidden !fixed !bottom-0 !left-0 !right-0 !w-full !z-[9999]" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        <div className="flex items-center justify-between px-4 py-3 w-full max-w-md mx-auto">
+          {navigationItems.slice(0, 3).map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
 
@@ -34,7 +40,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                   size="sm"
                   className={`flex flex-col items-center gap-1 p-3 h-auto w-16 rounded-xl transition-all duration-300 relative ${
                     isActive
-                      ? 'bg-gradient-to-br from-green-500/20 to-green-600/20 text-green-700 dark:text-green-400 shadow-lg scale-105'
+                      ? 'bg-green-500 text-white shadow-lg scale-105'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105'
                   }`}
                   onClick={() => onNavigate(item.id)}
@@ -61,7 +67,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
               size="sm"
               className={`flex flex-col items-center gap-1 p-3 h-auto w-16 rounded-xl transition-all duration-300 relative ${
                 currentPage === 'settings'
-                  ? 'bg-gradient-to-br from-green-500/20 to-green-600/20 text-green-700 dark:text-green-400 shadow-lg scale-105'
+                  ? 'bg-green-500 text-white shadow-lg scale-105'
                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105'
               }`}
               onClick={() => onNavigate('settings')}
@@ -82,9 +88,9 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
   return (
     <TooltipProvider>
-      <nav className="w-20 shadow-2xl shadow-lime-500/20 flex flex-col items-center py-6 rounded-l-3xl relative overflow-visible bg-green-600 dark:bg-green-800">
+      <nav className="hidden md:flex w-20 shadow-2xl shadow-lime-500/20 flex-col items-center py-6 rounded-l-3xl relative overflow-visible bg-green-600 dark:bg-green-800">
         {/* Logo */}
-        <div className="mb-8">
+        <div className="mb-8 w-full flex justify-center">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden bg-white">
             <img
               src="/logo.svg"
@@ -95,8 +101,8 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
         </div>
 
         {/* Navigation Items */}
-        <div className="flex flex-col gap-4 flex-1">
-          {navigationItems.map((item) => {
+        <div className="flex flex-col gap-4 items-center">
+          {navigationItems.slice(0, 3).map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
 
@@ -114,8 +120,8 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                       size="sm"
                       className={`w-12 h-12 p-0 rounded-2xl transition-all duration-300 relative group transform hover:scale-110 ${
                         isActive
-                          ? 'bg-gradient-to-br from-white to-green-50 text-green-700 shadow-xl scale-110 ring-2 ring-white/50'
-                          : 'text-green-200 hover:bg-green-700/50 hover:text-white hover:shadow-lg'
+                          ? 'bg-white text-green-700 shadow-xl scale-110 ring-2 ring-white/80'
+                          : 'bg-green-500/20 text-green-100 hover:bg-green-700/70 hover:text-white hover:shadow-lg'
                       }`}
                       onClick={() => onNavigate(item.id)}
                     >
@@ -136,6 +142,9 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
           })}
         </div>
 
+        {/* Flexible spacer to push bottom buttons down */}
+        <div className="flex-1"></div>
+
         {/* Bottom Section: Settings and Theme Toggle */}
         <div className="mt-auto flex flex-col gap-4 items-center">
           <div className="relative">
@@ -151,8 +160,8 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                   size="sm"
                   className={`w-12 h-12 p-0 rounded-2xl transition-all duration-300 relative transform hover:scale-110 ${
                     currentPage === 'settings'
-                      ? 'bg-gradient-to-br from-white to-green-50 text-green-700 shadow-xl scale-110 ring-2 ring-white/50'
-                      : 'hover:bg-green-700/50 text-green-200 hover:text-white hover:shadow-lg'
+                      ? 'bg-white text-green-700 shadow-xl scale-110 ring-2 ring-white/80'
+                      : 'bg-green-500/20 text-green-100 hover:bg-green-700/70 hover:text-white hover:shadow-lg'
                   }`}
                   onClick={() => onNavigate('settings')}
                 >

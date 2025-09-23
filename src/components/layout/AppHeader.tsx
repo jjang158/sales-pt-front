@@ -14,7 +14,7 @@ export const AppHeader = memo(() => {
    <h1
   className="font-bold select-none text-black dark:text-white text-2xl"
   style={{
-    fontFamily: 'RiaSans, "리아체", "Riache", var(--font-riache), sans-serif',
+    fontFamily: '"RiaSans", "Noto Sans KR", "Noto Sans", sans-serif',
     fontWeight: 700,
   }}
 >
