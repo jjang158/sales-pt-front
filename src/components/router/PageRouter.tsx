@@ -59,6 +59,7 @@ export const PageRouter = memo<PageRouterProps>(
     navigateTo,
     selectCustomer,
     startRecording,
+    login,
   }) => {
     const commonProps = {
       onNavigate: navigateTo,
@@ -125,6 +126,9 @@ export const PageRouter = memo<PageRouterProps>(
 
       case 'documents':
         return <DocumentsPage />;
+
+      case 'login':
+        return <LoginPage {...commonProps} onLogin={login} />;
 
       default:
         throw new Error(`Unknown page: ${currentPage}`);
