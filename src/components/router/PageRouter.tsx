@@ -4,7 +4,7 @@ import { IntegratedCustomerPage } from '../IntegratedCustomerPage';
 import { ClientDetailPage } from '../customer/detail/ClientDetailPage';
 import { SettingsPage } from '../SettingsPage';
 import { ReviewPage } from '../review/ReviewPage';
-import { RecordPage } from '../record/RecordPage';
+import { RecordPage } from '../pages/RecordPage';
 import { DocumentsPage } from '../pages/DocumentsPage';
 import type { Page, RecordingContext } from '../../types/index';
 import { FloatingChatbot } from '../FloatingChatbot';
