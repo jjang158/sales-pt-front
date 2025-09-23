@@ -13,7 +13,21 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// 플랫폼별 API URL 설정
+const getApiUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  // 현재 환경 정보 로그
+  console.log('🔍 API URL 설정:', {
+    location: window.location,
+    envUrl,
+    isCapacitor: window.location.protocol === 'https:' && window.location.hostname === 'localhost'
+  });
+
+  return envUrl;
+};
+
+const API_BASE_URL = getApiUrl();
 
 // =============================================================================
 // Common Types
@@ -235,7 +249,7 @@ export interface SalesMetaResponse {
 
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
@@ -244,8 +258,11 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
     ...options,
   };
 
+  console.log('🌐 API 요청:', { url, method: config.method || 'GET', API_BASE_URL });
+
   try {
     const response = await fetch(url, config);
+    console.log('✅ API 응답:', { status: response.status, ok: response.ok, url });
     
     if (!response.ok) {
       let errorData;
@@ -271,10 +288,12 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
     
     return {} as T;
   } catch (error) {
+    console.error('❌ API 요청 실패:', { url, error });
+
     if (error instanceof APIError) {
       throw error;
     }
-    
+
     const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
     throw new APIError(0, message, error);
   }
