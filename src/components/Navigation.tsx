@@ -21,7 +21,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
   if (isMobile) {
     return (
-      <nav className="fixed bottom-0 left-0 right-0 bg-green-500 dark:bg-green-700 backdrop-blur-md border-t border-green-400 dark:border-green-600 z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-green-500 dark:bg-green-700 backdrop-blur-md border-t border-green-400 dark:border-green-600 z-50 safe-area-bottom safe-area-left safe-area-right">
         <div className="flex items-center justify-between px-4 py-2 w-full max-w-md mx-auto">
           {navigationItems.map((item) => {
             const Icon = item.icon;

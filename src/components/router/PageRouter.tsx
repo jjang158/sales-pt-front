@@ -60,6 +60,7 @@ export const PageRouter = memo<PageRouterProps>(
     selectCustomer,
     startRecording,
     login,
+    logout,
   }) => {
     const commonProps = {
       onNavigate: navigateTo,
@@ -122,7 +123,7 @@ export const PageRouter = memo<PageRouterProps>(
         return <IntegratedCustomerPage {...commonProps} />;
 
       case 'settings':
-        return <SettingsPage {...commonProps} />;
+        return <SettingsPage {...commonProps} logout={logout} />;
 
       case 'documents':
         return <DocumentsPage />;

@@ -96,6 +96,8 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
       };
 
     case 'LOGIN':
+      // localStorage에 사용자 정보 저장
+      localStorage.setItem('user', JSON.stringify(action.payload.user));
       return {
         ...state,
         currentPage: 'dashboard',
@@ -103,8 +105,10 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
       };
 
     case 'LOGOUT':
+      // localStorage에서 사용자 정보 제거
+      localStorage.removeItem('user');
       return {
-        ...initialState,
+        ...getInitialState(),
         currentPage: 'login',
       };
 
@@ -113,20 +117,42 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
   }
 };
 
-const initialState: ApplicationState = {
-  currentPage: 'login',
-  selectedCustomerId: null,
-  recordingContext: null,
-  user: null,
-  sttResult: null,
-  recordingData: null, // 🔥 초기값 추가
+const getInitialState = (): ApplicationState => {
+  // 저장된 사용자 정보가 있는지 확인
+  const savedUser = localStorage.getItem('user');
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
+      return {
+        currentPage: 'dashboard',
+        selectedCustomerId: null,
+        recordingContext: null,
+        user: user,
+        sttResult: null,
+        recordingData: null,
+      };
+    } catch (error) {
+      // localStorage에 잘못된 데이터가 있으면 제거
+      localStorage.removeItem('user');
+    }
+  }
+
+  // 로그인되지 않은 경우 로그인 페이지로
+  return {
+    currentPage: 'login',
+    selectedCustomerId: null,
+    recordingContext: null,
+    user: null,
+    sttResult: null,
+    recordingData: null,
+  };
 };
 
 /**
  * Type-safe application state with auto-cleanup
  */
 export const useApplicationState = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, getInitialState());
 
   const actions = useMemo(
     () => ({

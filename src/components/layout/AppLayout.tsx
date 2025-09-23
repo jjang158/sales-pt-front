@@ -15,12 +15,25 @@ interface AppLayoutProps {
  */
 export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, children }) => {
   const isMobile = useIsMobile();
+  const isLoginPage = currentPage === 'login';
+
+  if (isLoginPage) {
+    return (
+      <div className="mobile-scroll-container bg-background flex flex-col safe-area-inset">
+        <main className="flex-1 bg-background page-container overflow-auto">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   if (isMobile) {
     return (
-      <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <div className="mobile-scroll-container bg-background flex flex-col safe-area-top safe-area-left safe-area-right">
+        {/* Status bar background for Android */}
+        <div className="status-bar-bg"></div>
         <AppHeader />
-        <main className="flex-1 bg-background page-container overflow-auto pb-16">
+        <main className="flex-1 bg-background page-container overflow-auto pb-16 safe-area-bottom">
           {children}
         </main>
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />

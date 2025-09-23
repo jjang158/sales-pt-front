@@ -6,7 +6,7 @@ import { Bell, ChevronDown } from 'lucide-react';
  */
 export const AppHeader = memo(() => (
   //서비스 명 색 변경 (그라데이션-그린 > 검은색 단색)
-  <header className="bg-card/95 dark:bg-card/50 backdrop-blur-sm border-b border-border/50 dark:border-border/20 px-6 py-4 flex items-center justify-between">
+  <header className="bg-card/95 dark:bg-card/50 backdrop-blur-sm border-b border-border/50 dark:border-border/20 px-6 py-4 flex items-center justify-between safe-area-left safe-area-right avoid-camera">
    <h1 
   className="font-semibold select-none text-black dark:text-white"
   style={{
