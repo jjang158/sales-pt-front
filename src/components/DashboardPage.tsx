@@ -287,7 +287,7 @@ const isTodayOrFuture = (date: Date) => {
           <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
         </>
       )}
-      <div className={`${isMobile ? 'pt-4 pb-4 px-3' : 'pt-4 pb-4 px-4'}`}>
+      <div className={`${isMobile ? 'pt-6 pb-20 px-3' : 'pt-4 pb-4 px-4'}`}>
 
         {/* Main Content with Side Panels - 70:30 비율로 변경 */}
         <div className={`grid ${isMobile ? 'grid-cols-1 gap-4 mt-0' : 'gap-6 mt-2'}`} style={!isMobile ? { gridTemplateColumns: '7fr 3fr' } : {}}>
@@ -441,7 +441,7 @@ const isTodayOrFuture = (date: Date) => {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className={`space-y-3 overflow-y-auto scrollbar-styled ${isMobile ? 'mobile-card-content' : 'max-h-96'}`}>
+              <CardContent className={`space-y-3 ${isMobile ? 'mobile-card-content flex-1 min-h-0 overflow-y-auto' : 'flex-1 min-h-0 overflow-y-auto'}`}>
                 {isLoading ? (
                   <div className="text-center py-8">
                     <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />

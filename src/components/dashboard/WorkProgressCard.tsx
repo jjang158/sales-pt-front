@@ -16,22 +16,22 @@ export function WorkProgressCard({ stats, onStageClick }: WorkProgressCardProps)
 
   return (
     <Card className={`rounded-2xl shadow-lg ${isMobile ? 'mx-4' : ''}`}>
-      <CardHeader className={`${isMobile ? 'px-4 pt-4 pb-3' : 'px-6 pt-6 pb-3'}`}>
+      <CardHeader className={`${isMobile ? 'px-5 pt-5 pb-3' : 'px-6 pt-6 pb-3'}`}>
         <CardTitle className={`flex items-center gap-2 ${isMobile ? 'text-lg' : ''}`}>
           <CheckSquare className={`${isMobile ? 'w-4 h-4' : 'w-5'}`} />
           do
         </CardTitle>
       </CardHeader>
-      <CardContent className={`${isMobile ? 'px-4 pb-4' : 'px-6 pb-6'} space-y-4`}>
+      <CardContent className={`${isMobile ? 'px-5 pb-5' : 'px-6 pb-6'} space-y-4`}>
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 gap-4'}`}>
           {/* DO (할 일) */}
           <button
             className={`text-left bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group ${
-              isMobile ? 'p-3' : 'p-4'
+              isMobile ? 'p-4' : 'p-4'
             }`}
             onClick={() => onStageClick('DO')}
           >
-            <div className={`flex items-center ${isMobile ? 'justify-between mb-2' : 'justify-between mb-4'}`}>
+            <div className={`flex items-center ${isMobile ? 'justify-between mb-1' : 'justify-between mb-2'}`}>
               {!isMobile && (
                 <div className={`bg-orange-500 rounded-full flex items-center justify-center ${
                   isMobile ? 'w-8 h-8' : 'w-10 h-10'
@@ -70,11 +70,11 @@ export function WorkProgressCard({ stats, onStageClick }: WorkProgressCardProps)
           {/* DONE (완료) */}
           <button
             className={`text-left bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${
-              isMobile ? 'p-3' : 'p-4'
+              isMobile ? 'p-4' : 'p-4'
             }`}
             onClick={() => onStageClick('DONE')}
           >
-            <div className={`flex items-center ${isMobile ? 'justify-between mb-2' : 'justify-between mb-4'}`}>
+            <div className={`flex items-center ${isMobile ? 'justify-between mb-1' : 'justify-between mb-2'}`}>
               {!isMobile && (
                 <div className={`bg-green-500 rounded-full flex items-center justify-center ${
                   isMobile ? 'w-8 h-8' : 'w-10 h-10'

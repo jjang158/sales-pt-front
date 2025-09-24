@@ -25,7 +25,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
   if (isMobile) {
     return (
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 mobile-safe-bottom bg-card border-t border-border shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="grid grid-cols-4 h-20 max-w-md mx-auto px-safe">
+        <div className="grid grid-cols-4 h-16 max-w-md mx-auto px-safe">
           {[...navigationItems, settingsItem].map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -61,7 +61,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
   return (
     <TooltipProvider>
-      <nav className="hidden md:flex w-20 h-screen shadow-lg relative overflow-visible bg-card border-r border-border">
+      <nav className="hidden md:flex w-20 h-full shadow-lg relative overflow-visible bg-card border-r border-border">
         <div className="flex flex-col items-center justify-between w-full h-full py-6">
           {/* Top Section: Logo + Navigation Items */}
         <div className="flex flex-col items-center gap-8 flex-shrink-0">

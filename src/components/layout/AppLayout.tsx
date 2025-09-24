@@ -41,7 +41,7 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
 
   return (
     <div className="hidden md:block h-screen bg-background p-6 transition-colors duration-300">
-      <div className="h-screen bg-card rounded-3xl shadow-xl border border-border/50 flex relative">
+      <div className="h-full bg-card rounded-3xl shadow-xl border border-border/50 flex relative">
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />
         <div className="flex-1 flex flex-col min-h-0">
           <AppHeader />
