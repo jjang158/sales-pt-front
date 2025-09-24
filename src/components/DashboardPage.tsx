@@ -287,10 +287,10 @@ const isTodayOrFuture = (date: Date) => {
           <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
         </>
       )}
-      <div className={`${isMobile ? 'pt-6 pb-6 px-4' : 'pt-4 pb-6 px-6'}`}>
+      <div className={`${isMobile ? 'pt-4 pb-4 px-3' : 'pt-4 pb-4 px-4'}`}>
 
         {/* Main Content with Side Panels - 70:30 비율로 변경 */}
-        <div className={`grid ${isMobile ? 'grid-cols-1 gap-4 -mt-4' : 'gap-6 -mt-8'}`} style={!isMobile ? { gridTemplateColumns: '7fr 3fr' } : {}}>
+        <div className={`grid ${isMobile ? 'grid-cols-1 gap-4 mt-0' : 'gap-6 mt-2'}`} style={!isMobile ? { gridTemplateColumns: '7fr 3fr' } : {}}>
 
           {/* Left Column - 업무진행현황 + 업무리스트 (70% - 7/10) */}
           <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
@@ -299,63 +299,77 @@ const isTodayOrFuture = (date: Date) => {
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-green-500 via-green-600 to-green-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-orange-400 rounded-full shadow-lg animate-pulse" />
-              <CardHeader className="!pt-1 !pb-1">
+              <CardHeader className={`${isMobile ? 'px-4 pt-4 pb-3' : 'px-6 pt-6 pb-3'}`}>
                 <CardTitle className="flex items-center gap-2">
                   <CheckSquare className="w-5" />
                   업무 진행 현황
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
-                <div className={`grid gap-6 ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2'}`}>
+              <CardContent className={`${isMobile ? 'px-4 pb-4' : 'px-6 pb-6'} space-y-4`}>
+                <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 gap-4'}`}>
                   {/* DO (할 일) */}
                   <button
-                    className={`${isMobile ? '' : 'text-left'} bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-2.5' : 'p-6'}`}
+                    className={`${isMobile ? '' : 'text-left'} bg-orange-50 dark:bg-orange-900/20 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-4'}`}
                     onClick={() => handleStageClick('DO')}
                   >
-                    <div className={`flex items-center ${isMobile ? 'justify-center gap-2 mb-1' : 'justify-between mb-4'}`}>
-                      <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-orange-500 rounded-full flex items-center justify-center`}>
-                        <Clock className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
-                      </div>
-                      <div className={isMobile ? 'text-center' : 'text-right'}>
-                        <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>
-                          {stats.incomplete}
-                        </p>
-                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-orange-600 dark:text-orange-500`}>개</p>
+                    <div className={`flex items-center ${isMobile ? 'justify-between mb-2' : 'justify-between mb-4'}`}>
+                      {!isMobile && (
+                        <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-orange-500 rounded-full flex items-center justify-center`}>
+                          <Clock className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        {isMobile && (
+                          <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-orange-500 rounded-full flex items-center justify-center`}>
+                            <Clock className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
+                          </div>
+                        )}
+                        <span className="text-sm text-orange-800 dark:text-orange-300">할 일</span>
+                        <div className={isMobile ? 'text-center' : 'text-right'}>
+                          <div className={isMobile ? 'flex items-center justify-center gap-1' : ''}>
+                            <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>
+                              {stats.incomplete}
+                            </p>
+                            <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-orange-600 dark:text-orange-500`}>개</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className={isMobile ? 'text-center' : ''}>
-                      <h3 className={`font-semibold text-orange-800 dark:text-orange-300 ${isMobile ? 'text-xs' : 'mb-1 text-lg'}`}>할 일 (DO)</h3>
-                      {!isMobile && (
-                        <p className="text-base text-orange-600 dark:text-orange-400">
-                          진행해야 할 업무들
-                        </p>
-                      )}
+                      <h3 className={`font-semibold text-orange-800 dark:text-orange-300 ${isMobile ? 'text-xs' : 'mb-1 text-2xl'}`}>do</h3>
                     </div>
                   </button>
 
                   {/* DONE (완료) */}
                   <button
-                    className={`${isMobile ? '' : 'text-left'} bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-2.5' : 'p-6'}`}
+                    className={`${isMobile ? '' : 'text-left'} bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-4'}`}
                     onClick={() => handleStageClick('DONE')}
                   >
-                    <div className={`flex items-center ${isMobile ? 'justify-center gap-2 mb-1' : 'justify-between mb-4'}`}>
-                      <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-green-500 rounded-full flex items-center justify-center`}>
-                        <CheckSquare className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
-                      </div>
-                      <div className={isMobile ? 'text-center' : 'text-right'}>
-                        <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>
-                          {stats.completed}
-                        </p>
-                        <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-green-600 dark:text-green-500`}>개</p>
+                    <div className={`flex items-center ${isMobile ? 'justify-between mb-2' : 'justify-between mb-4'}`}>
+                      {!isMobile && (
+                        <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-green-500 rounded-full flex items-center justify-center`}>
+                          <CheckSquare className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        {isMobile && (
+                          <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-green-500 rounded-full flex items-center justify-center`}>
+                            <CheckSquare className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
+                          </div>
+                        )}
+                        <span className="text-sm text-green-800 dark:text-green-300">완료</span>
+                        <div className={isMobile ? 'text-center' : 'text-right'}>
+                          <div className={isMobile ? 'flex items-center justify-center gap-1' : ''}>
+                            <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>
+                              {stats.completed}
+                            </p>
+                            <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-green-600 dark:text-green-500`}>개</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div className={isMobile ? 'text-center' : ''}>
-                      <h3 className={`font-semibold text-green-800 dark:text-green-300 ${isMobile ? 'text-xs' : 'mb-1 text-lg'}`}>완료 (DONE)</h3>
-                      {!isMobile && (
-                        <p className="text-base text-green-600 dark:text-green-400">
-                          완료된 업무들
-                        </p>
-                      )}
+                      <h3 className={`font-semibold text-green-800 dark:text-green-300 ${isMobile ? 'text-xs' : 'mb-1 text-2xl'}`}>done</h3>
                     </div>
                   </button>
                 </div>
