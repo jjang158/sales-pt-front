@@ -221,11 +221,15 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
       }));
   }, [messages]);
 
+  // 선택된 파일들 상태 관리
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   // 파일 업로드 핸들러
   const handleFileSelect = useCallback((files: File[]) => {
     if (files.length > 0) {
+      setSelectedFiles(files);
       const fileNames = files.map(f => f.name).join(', ');
-      const fileMessage = `📎 파일 업로드: ${fileNames}`;
+      const fileMessage = `📎 파일 첨부: ${fileNames}`;
       setMessage(prev => prev ? `${prev}\n${fileMessage}` : fileMessage);
     }
   }, []);
@@ -240,13 +244,15 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
     const textToSend = messageText || message.trim();
     if (!textToSend || isLoading) return;
 
+    const hasFiles = selectedFiles.length > 0;
+
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
       text: textToSend,
-      timestamp: new Date().toLocaleTimeString('ko-KR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      timestamp: new Date().toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit'
       })
     };
 
@@ -254,10 +260,10 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
     const loadingMessage: Message = {
       id: (Date.now() + 1).toString(),
       type: 'bot',
-      text: '답변을 생성하고 있습니다...',
-      timestamp: new Date().toLocaleTimeString('ko-KR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      text: hasFiles ? '파일을 분석하고 답변을 생성하고 있습니다...' : '답변을 생성하고 있습니다...',
+      timestamp: new Date().toLocaleTimeString('ko-KR', {
+        hour: '2-digit',
+        minute: '2-digit'
       }),
       isLoading: true
     };
@@ -268,51 +274,63 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
     setIsLoading(true);
 
     try {
-      // API 호출
       const history = getApiHistory();
-      const response = await consultAPI.sendChatMessage(textToSend, history);
+      let response;
+
+      if (hasFiles) {
+        // 파일이 있는 경우 파일 업로드 API 사용
+        response = await consultAPI.sendChatMessageWithFiles(textToSend, selectedFiles, history);
+      } else {
+        // 파일이 없는 경우 기존 API 사용
+        response = await consultAPI.sendChatMessage(textToSend, history);
+      }
 
       // 로딩 메시지를 실제 응답으로 교체
       const botMessage: Message = {
         id: loadingMessage.id,
         type: 'bot',
         text: response.answer,
-        timestamp: new Date().toLocaleTimeString('ko-KR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        timestamp: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit'
         }),
         sources: response.sources
       };
 
-      setMessages(prev => 
-        prev.map(msg => 
+      setMessages(prev =>
+        prev.map(msg =>
           msg.id === loadingMessage.id ? botMessage : msg
         )
       );
 
+      // 파일 업로드 성공 후 선택된 파일 초기화
+      if (hasFiles) {
+        setSelectedFiles([]);
+      }
+
     } catch (error) {
       console.error('챗봇 응답 실패:', error);
-      
+
       // 에러 메시지로 교체
       const errorMessage: Message = {
         id: loadingMessage.id,
         type: 'bot',
         text: `죄송합니다. 응답을 생성하는 중 오류가 발생했습니다: ${apiUtils.formatErrorMessage(error)}`,
-        timestamp: new Date().toLocaleTimeString('ko-KR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
+        timestamp: new Date().toLocaleTimeString('ko-KR', {
+          hour: '2-digit',
+          minute: '2-digit'
         })
       };
 
-      setMessages(prev => 
-        prev.map(msg => 
+      setMessages(prev =>
+        prev.map(msg =>
           msg.id === loadingMessage.id ? errorMessage : msg
         )
       );
     } finally {
       setIsLoading(false);
     }
-  }, [message, isLoading, getApiHistory]);
+  }, [message, isLoading, getApiHistory, selectedFiles]);
 
   // 키보드 이벤트
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {

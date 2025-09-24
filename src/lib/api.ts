@@ -274,7 +274,8 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
 
   const config: RequestInit = {
     headers: {
-      'Content-Type': 'application/json',
+      // FormData인 경우 Content-Type을 설정하지 않음 (브라우저가 자동 설정)
+      ...(!(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
     ...options,
@@ -527,7 +528,7 @@ export const consultAPI = {
       body: formData,
       headers: {
         // Content-Type을 제거하여 브라우저가 자동으로 multipart/form-data 설정하도록 함
-      },
+      } as HeadersInit,
     });
 
     return response.data;

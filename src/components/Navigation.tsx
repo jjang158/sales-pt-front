@@ -88,65 +88,66 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
   return (
     <TooltipProvider>
-      <nav className="hidden md:flex w-20 shadow-2xl shadow-lime-500/20 flex-col items-center py-6 rounded-l-3xl relative overflow-visible bg-green-600 dark:bg-green-800">
-        {/* Logo */}
-        <div className="mb-8 w-full flex justify-center">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden bg-white">
-            <img
-              src="/logo.svg"
-              alt="Logo"
-              className="w-8 h-8 object-contain"
-            />
+      <nav className="hidden md:flex w-20 h-screen shadow-2xl shadow-lime-500/20 rounded-l-3xl relative overflow-visible bg-green-600 dark:bg-green-800">
+        <div className="flex flex-col items-center justify-between w-full h-full py-6">
+          {/* Top Section: Logo + Navigation Items */}
+        <div className="flex flex-col items-center gap-8 flex-shrink-0">
+          {/* Logo */}
+          <div className="w-full flex justify-center">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg overflow-hidden bg-white">
+              <img
+                src="/logo.svg"
+                alt="Logo"
+                className="w-8 h-8 object-contain"
+              />
+            </div>
+          </div>
+
+          {/* Navigation Items */}
+          <div className="flex flex-col gap-4 items-center">
+            {navigationItems.slice(0, 3).map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPage === item.id;
+
+              return (
+                <div key={item.id} className="relative">
+                  {/* 활성 페이지 연결선 */}
+                  {isActive && (
+                    <div className="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-0.5 bg-gradient-to-r from-white to-transparent rounded-full animate-pulse" />
+                  )}
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={`w-12 h-12 p-0 rounded-2xl transition-all duration-300 relative group transform hover:scale-110 ${
+                          isActive
+                            ? 'bg-white text-green-700 shadow-xl scale-110 ring-2 ring-white/80'
+                            : 'bg-green-500/20 text-green-100 hover:bg-green-700/70 hover:text-white hover:shadow-lg'
+                        }`}
+                        onClick={() => onNavigate(item.id)}
+                      >
+                        <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
+
+                        {/* 활성 상태 표시기 */}
+                        {isActive && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-bounce shadow-lg" />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" sideOffset={12}>
+                      <p>{item.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Navigation Items */}
-        <div className="flex flex-col gap-4 items-center">
-          {navigationItems.slice(0, 3).map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPage === item.id;
-
-            return (
-              <div key={item.id} className="relative">
-                {/* 활성 페이지 연결선 */}
-                {isActive && (
-                  <div className="absolute -right-5 top-1/2 -translate-y-1/2 w-10 h-0.5 bg-gradient-to-r from-white to-transparent rounded-full animate-pulse" />
-                )}
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={`w-12 h-12 p-0 rounded-2xl transition-all duration-300 relative group transform hover:scale-110 ${
-                        isActive
-                          ? 'bg-white text-green-700 shadow-xl scale-110 ring-2 ring-white/80'
-                          : 'bg-green-500/20 text-green-100 hover:bg-green-700/70 hover:text-white hover:shadow-lg'
-                      }`}
-                      onClick={() => onNavigate(item.id)}
-                    >
-                      <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
-
-                      {/* 활성 상태 표시기 */}
-                      {isActive && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-bounce shadow-lg" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" sideOffset={12}>
-                    <p>{item.label}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Flexible spacer to push bottom buttons down */}
-        <div className="flex-1"></div>
-
         {/* Bottom Section: Settings and Theme Toggle */}
-        <div className="mt-auto flex flex-col gap-4 items-center">
+        <div className="flex flex-col gap-4 items-center flex-shrink-0">
           <div className="relative">
             {/* 설정 페이지 연결선 */}
             {currentPage === 'settings' && (
@@ -180,6 +181,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
           </div>
           <ThemeToggle />
         </div>
+      </div>
       </nav>
     </TooltipProvider>
   );
