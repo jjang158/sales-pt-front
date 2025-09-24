@@ -58,14 +58,14 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
     setMounted(true);
   }, []);
 
-  // 디버깅: 모바일에서 상태 확인
-  if (process.env.NODE_ENV === 'development') {
-    console.log('FloatingChatbot - mounted:', mounted, 'isMobile:', isMobile, 'isOpen:', isOpen);
-  }
-
-  // 드래그 관련 상태
+  // 드래그 관련 상태 - 웹 기준 통일
   const [position, setPosition] = useState<Position>({ x: 40, y: 80 });
   const [isDragging, setIsDragging] = useState(false);
+
+  // 디버깅: 모바일에서 상태 확인
+  if (process.env.NODE_ENV === 'development') {
+    console.log('FloatingChatbot RENDER - mounted:', mounted, 'isMobile:', isMobile, 'isOpen:', isOpen, 'window.innerWidth:', typeof window !== 'undefined' ? window.innerWidth : 'undefined');
+  }
   const [dragStart, setDragStart] = useState<Position>({ x: 0, y: 0 });
 
   const [expandedSources, setExpandedSources] = useState<string[]>([]);
@@ -143,11 +143,12 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
   // 드래그 관련 함수들
   const constrainPosition = useCallback((pos: Position): Position => {
+    const maxX = isMobile ? 100 : 200;
     return {
-      x: Math.max(20, Math.min(200, pos.x)),
+      x: Math.max(20, Math.min(maxX, pos.x)),
       y: Math.max(20, Math.min(200, pos.y))
     };
-  }, []);
+  }, [isMobile]);
 
   const handleDragStart = useCallback((clientX: number, clientY: number) => {
     if (isOpen) return;
@@ -176,17 +177,15 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
   }, [isDragging, position, savePosition]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (isMobile) return; // 모바일에서는 드래그 비활성화
     e.preventDefault();
     handleDragStart(e.clientX, e.clientY);
-  }, [handleDragStart, isMobile]);
+  }, [handleDragStart]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (isMobile) return; // 모바일에서는 드래그 비활성화
     e.preventDefault();
     const touch = e.touches[0];
     handleDragStart(touch.clientX, touch.clientY);
-  }, [handleDragStart, isMobile]);
+  }, [handleDragStart]);
 
   // 전역 드래그 이벤트 리스너
   useEffect(() => {
@@ -220,11 +219,13 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
   // 챗봇 토글
   const toggleChat = useCallback(() => {
+    console.log('toggleChat clicked - before:', { isOpen, isMobile, mounted });
     setIsOpen(!isOpen);
     if (!isOpen) {
       setIsFullscreen(false);
     }
-  }, [isOpen]);
+    console.log('toggleChat clicked - after will be:', !isOpen);
+  }, [isOpen, isMobile, mounted]);
 
   // 전체화면 토글
   const toggleFullscreen = useCallback(() => {
@@ -457,188 +458,60 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
     </div>
   );
 
+  // 모바일에서 마운트 상태 확인
+  if (!mounted) {
+    console.log('FloatingChatbot NOT MOUNTED YET');
+    return null;
+  }
+
   return (
     <>
-      {/* FAB 컨테이너 */}
+      {/* FAB 컨테이너 - 웹 기준 통일 */}
       <div
         className={`fixed z-50 ${className}`}
-        style={isMobile ? {
-          right: '20px',
-          bottom: '20px',
-        } : {
+        style={{
           right: `${position.x}px`,
           bottom: `${position.y}px`,
+          zIndex: 9999,
         }}
         role="dialog"
         aria-label="AI 챗봇"
       >
         {/* Floating Action Button */}
         {!isOpen && (
-          <Button
+          <>
+            {console.log('Rendering FAB button - isOpen:', isOpen, 'isMobile:', isMobile)}
+            <Button
             onClick={toggleChat}
-            {...(!isMobile && {
-              onMouseDown: handleMouseDown,
-              onTouchStart: handleTouchStart
-            })}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
             className={`
-              w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20
+              w-16 h-16
               rounded-full shadow-lg hover:shadow-xl
               transition-all duration-300 hover:scale-105
               bg-primary text-primary-foreground
-              ${!isMobile && isDragging
+              ${isDragging
                 ? 'scale-105 cursor-grabbing opacity-90'
-                : isMobile
-                ? 'cursor-pointer'
                 : 'cursor-grab hover:opacity-90'
               }
-              ${isMobile ? 'select-auto' : 'touch-none select-none'}
+              touch-none select-none
             `}
-            aria-label={isMobile ? "AI 챗봇 열기" : "AI 챗봇 열기 (드래그하여 이동 가능)"}
+            aria-label="AI 챗봇 열기 (드래그하여 이동 가능)"
             title="AI 챗봇 - 고객 정보 검색 및 상담 지원"
           >
-            <MessageSquare className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10" />
+            <MessageSquare className="w-8 h-8" />
           </Button>
+          </>
         )}
 
-        {/* 챗봇 패널 */}
+        {/* 챗봇 패널 - 웹 기준 통일 */}
         {isOpen && !isFullscreen && (
-          <>
-            {/* 모바일: 작은 창 (데스크톱과 유사) */}
-            {isMobile && (
-              <div className="fixed bottom-4 right-4 left-4 top-4 pointer-events-none z-50">
-                <Card className="w-[350px] h-[75vh] max-h-[600px] mx-auto mt-auto mb-24 shadow-xl rounded-3xl border-border bg-card animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col pointer-events-auto">
-                <CardHeader className="pb-2 px-4 pt-4 border-b border-border shrink-0 rounded-t-3xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-base font-medium">AI 어시스턴트</CardTitle>
-                      <p className="text-xs text-muted-foreground compact-line-height">고객 정보 검색·상담 지원</p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={resetChat}
-                        className="w-7 h-7 rounded-xl hover:bg-muted transition-colors touch-target"
-                      >
-                        <RotateCcw className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={toggleFullscreen}
-                        className="w-7 h-7 rounded-xl hover:bg-muted transition-colors touch-target"
-                      >
-                        <Maximize2 className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={toggleChat}
-                        className="w-7 h-7 rounded-xl hover:bg-muted transition-colors touch-target"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-
-                <div className="flex-1 min-h-0 flex flex-col">
-                  <div className="flex-1 p-3 overflow-y-auto scroll-container scrollbar-styled">
-                    <div className="space-y-4 pb-4">
-                      {messages.map(renderMessage)}
-                      <div ref={messagesEndRef} />
-                    </div>
-                  </div>
-
-                  <div className="border-t border-border p-2 shrink-0 bg-card">
-                    <p className="text-xs text-muted-foreground mb-1">빠른 질문:</p>
-                    <ScrollArea className="w-full whitespace-nowrap">
-                      <div className="flex gap-1.5 pb-1">
-                        {faqPlaceholders.map((faq, index) => (
-                          <Button
-                            key={index}
-                            variant="outline"
-                            size="sm"
-                            disabled={isLoading}
-                            className="rounded-full text-xs whitespace-nowrap hover:bg-accent"
-                            onClick={() => handleSendMessage(faq)}
-                          >
-                            {faq}
-                          </Button>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </div>
-
-                  {showFileUpload && (
-                    <div className="border-t border-border p-3 shrink-0 bg-muted/30">
-                      <FileUpload
-                        onFileSelect={handleFileSelect}
-                        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                        multiple={true}
-                        maxSize={10}
-                        className="mb-0"
-                      />
-                    </div>
-                  )}
-
-                  <div className="border-t border-border p-2 shrink-0 bg-card rounded-b-3xl">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 relative">
-                        <Input
-                          ref={inputRef}
-                          placeholder="메시지를 입력하세요..."
-                          value={message}
-                          onChange={(e) => setMessage(e.target.value)}
-                          onKeyDown={handleKeyPress}
-                          disabled={isLoading}
-                          className="rounded-2xl pr-16 bg-input-background border-input h-10 shadow-sm"
-                        />
-                        <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={isLoading}
-                            className="w-6 h-6 p-0 rounded-full hover:bg-muted/80 transition-colors touch-target"
-                          >
-                            <Mic className="w-3 h-3 text-muted-foreground" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            disabled={isLoading}
-                            onClick={toggleFileUpload}
-                            className={`w-6 h-6 p-0 rounded-full hover:bg-muted/80 transition-colors touch-target ${
-                              showFileUpload ? 'bg-primary/10 text-primary' : ''
-                            }`}
-                          >
-                            <Paperclip className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                      <Button
-                        onClick={() => handleSendMessage()}
-                        disabled={!message.trim() || isLoading}
-                        size="sm"
-                        className="rounded-2xl w-10 h-10 p-0 shadow-sm"
-                      >
-                        {isLoading ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <Send className="w-3 h-3" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                </Card>
-              </div>
-            )}
-
-            {/* 데스크톱: 우하단 고정 패널 */}
-            {!isMobile && (
-              <Card className="w-[450px] h-[600px] shadow-xl rounded-3xl border-border bg-card animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col">
-              <CardHeader className="pb-3 border-b border-border shrink-0 rounded-t-3xl">
+          <Card className="
+            shadow-xl rounded-3xl border-border bg-card
+            animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col
+            w-[450px] h-[600px]
+          ">
+              <CardHeader className="border-b border-border shrink-0 rounded-t-3xl pb-3 p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg font-medium">AI 어시스턴트</CardTitle>
@@ -649,7 +522,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       variant="ghost"
                       size="sm"
                       onClick={resetChat}
-                      className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
+                      className="rounded-xl hover:bg-muted transition-colors w-8 h-8"
                     >
                       <RotateCcw className="w-4 h-4" />
                     </Button>
@@ -657,7 +530,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       variant="ghost"
                       size="sm"
                       onClick={toggleFullscreen}
-                      className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
+                      className="rounded-xl hover:bg-muted transition-colors w-8 h-8"
                     >
                       <Maximize2 className="w-4 h-4" />
                     </Button>
@@ -665,7 +538,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       variant="ghost"
                       size="sm"
                       onClick={toggleChat}
-                      className="w-8 h-8 rounded-xl hover:bg-muted transition-colors"
+                      className="rounded-xl hover:bg-muted transition-colors w-8 h-8"
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -674,15 +547,15 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
               </CardHeader>
 
               <div className="flex-1 min-h-0 flex flex-col">
-                <ScrollArea className="flex-1 p-4 scroll-container scrollbar-styled">
-                  <div className="space-y-4">
-                    {messages.map(renderMessage)}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
+                  <ScrollArea className="flex-1 p-4 scroll-container scrollbar-styled">
+                    <div className="space-y-4">
+                      {messages.map(renderMessage)}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
 
-                <div className="border-t border-border p-3 shrink-0 bg-card">
-                  <p className="text-xs text-muted-foreground mb-2">빠른 질문:</p>
+                <div className="border-t border-border shrink-0 bg-card p-3">
+                  <p className="text-muted-foreground text-xs mb-2">빠른 질문:</p>
                   <ScrollArea className="w-full whitespace-nowrap">
                     <div className="flex gap-2 pb-2">
                       {faqPlaceholders.map((faq, index) => (
@@ -702,7 +575,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                 </div>
 
                 {showFileUpload && (
-                  <div className="border-t border-border p-4 shrink-0 bg-muted/30">
+                  <div className="border-t border-border shrink-0 bg-muted/30 p-4">
                     <FileUpload
                       onFileSelect={handleFileSelect}
                       accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
@@ -713,7 +586,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                   </div>
                 )}
 
-                <div className="border-t border-border p-4 shrink-0 bg-card rounded-b-3xl">
+                <div className="border-t border-border shrink-0 bg-card rounded-b-3xl p-4">
                   <div className="flex items-center gap-3">
                     <div className="flex-1 relative">
                       <Input
@@ -723,23 +596,23 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyPress}
                         disabled={isLoading}
-                        className="rounded-2xl pr-20 bg-input-background border-input h-11 shadow-sm"
+                        className="rounded-2xl bg-input-background border-input shadow-sm pr-20 h-11"
                       />
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                      <div className="absolute top-1/2 transform -translate-y-1/2 flex items-center right-3 gap-2">
                         <Button
                           variant="ghost"
                           size="sm"
                           disabled={isLoading}
-                          className="w-7 h-7 p-0 rounded-full hover:bg-muted/80 transition-colors"
+                          className="p-0 rounded-full hover:bg-muted/80 transition-colors w-7 h-7"
                         >
-                          <Mic className="w-4 h-4 text-muted-foreground" />
+                          <Mic className="text-muted-foreground w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
                           disabled={isLoading}
                           onClick={toggleFileUpload}
-                          className={`w-7 h-7 p-0 rounded-full hover:bg-muted/80 transition-colors ${
+                          className={`p-0 rounded-full hover:bg-muted/80 transition-colors w-7 h-7 ${
                             showFileUpload ? 'bg-primary/10 text-primary' : ''
                           }`}
                         >
@@ -751,10 +624,10 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       onClick={() => handleSendMessage()}
                       disabled={!message.trim() || isLoading}
                       size="sm"
-                      className="rounded-2xl w-11 h-11 p-0 shadow-sm"
+                      className="rounded-2xl p-0 shadow-sm w-11 h-11"
                     >
                       {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="animate-spin w-4 h-4" />
                       ) : (
                         <Send className="w-4 h-4" />
                       )}
@@ -762,9 +635,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                   </div>
                 </div>
               </div>
-              </Card>
-            )}
-          </>
+            </Card>
         )}
 
         {/* 전체화면 모드 */}

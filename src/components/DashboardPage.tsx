@@ -19,43 +19,7 @@ import { useTodoList } from '../hooks/useTodoList';
 import { TodoItem } from '../lib/api';
 import { AIInsightsWidget } from './features/AIInsightsWidget';
 import type { Page } from '../types/index';
-
-
-const mockAlerts = [
-  {
-    id: '1',
-    type: 'birthday',
-    title: '김민수님 생일',
-    description: '내일이 생일입니다 - 축하 메시지 전송',
-    customerId: '1',
-    badgeText: '내일',
-    iconColor: 'text-pink-600',
-    badgeColor: 'bg-pink-100 text-pink-800',
-    priority: 'medium' as const
-  },
-  {
-    id: '2',
-    type: 'follow-up',
-    title: '보험 갱신 알림',
-    description: '이지영님 종신보험 만료 예정',
-    customerId: '2',
-    badgeText: '3일 후',
-    iconColor: 'text-orange-600',
-    badgeColor: 'bg-orange-100 text-orange-800',
-    priority: 'high' as const
-  },
-  {
-    id: '3',
-    type: 'contract',
-    title: '계약 진행 현황',
-    description: '박준혁님 자동차보험 청약서 검토 필요',
-    customerId: '3',
-    badgeText: '진행중',
-    iconColor: 'text-blue-600',
-    badgeColor: 'bg-blue-100 text-blue-800',
-    priority: 'high' as const
-  }
-];
+import { mockAlerts, salesStageData, priorityColors, priorityTexts, alertIconColors } from '../data/dashboardData';
 
 interface DashboardPageProps {
   onNavigate: (page: Page) => void;
@@ -290,25 +254,11 @@ const isTodayOrFuture = (date: Date) => {
   };
 
   const getPriorityBadgeColor = (priority: string) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
-      case 'low':
-        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
-    }
+    return priorityColors[priority as keyof typeof priorityColors] || 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800';
   };
 
   const getPriorityText = (priority: string) => {
-    switch (priority) {
-      case 'high': return '높음';
-      case 'medium': return '중간';
-      case 'low': return '낮음';
-      default: return '중간';
-    }
+    return priorityTexts[priority as keyof typeof priorityTexts] || '중간';
   };
 
   // 에러 표시
@@ -413,7 +363,8 @@ const isTodayOrFuture = (date: Date) => {
             </Card>
 
             {/* 업무 리스트 */}
-            <Card className={`rounded-2xl shadow-lg relative border-border/50 dark:border-border/20 dark:bg-card/50 overflow-visible ${isMobile ? 'mobile-card-compact' : ''}`}>
+            <div className="relative">
+            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 overflow-visible ${isMobile ? 'mobile-card-compact' : ''}`}>
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-blue-400 rounded-full shadow-lg animate-pulse" />
@@ -594,25 +545,29 @@ const isTodayOrFuture = (date: Date) => {
                 )}
               </CardContent>
 
-              {/* Floating Add Todo Button - Exact format as requested */}
+              {/* Floating Add Todo Button - Fixed positioning with wrapper container */}
               <button
                 data-slot="button"
-                className="inline-flex items-center justify-center 
-                           whitespace-nowrap text-sm font-medium 
+                className="inline-flex items-center justify-center
+                           whitespace-nowrap text-sm font-medium
                            disabled:pointer-events-none disabled:opacity-50
-                           [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 
-                           shrink-0 [&_svg]:shrink-0 
-                           outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] 
-                           aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive 
-                           text-foreground hover:bg-accent hover:text-accent-foreground 
-                           dark:bg-input/30 dark:border-input dark:hover:bg-input/50 
-                           gap-1.5 has-[>svg]:px-2.5 
-                           absolute bottom-4 right-4 
-                           w-10 h-10 
-                           rounded-full p-0 
-                           shadow-lg hover:shadow-xl transition-shadow 
-                           z-10 
+                           [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4
+                           shrink-0 [&_svg]:shrink-0
+                           outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+                           aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive
+                           text-foreground hover:bg-accent hover:text-accent-foreground
+                           dark:bg-input/30 dark:border-input dark:hover:bg-input/50
+                           gap-1.5 has-[>svg]:px-2.5
+                           w-10 h-10
+                           rounded-full p-0
+                           shadow-lg hover:shadow-xl transition-shadow
                            bg-background border-2"
+                style={{
+                  position: 'absolute',
+                  bottom: '16px',
+                  right: '16px',
+                  zIndex: 50
+                }}
                 title="새 할 일 추가"
                 disabled={!isTodayOrFuture(selectedDate)}
                 onClick={() => {
@@ -627,6 +582,7 @@ const isTodayOrFuture = (date: Date) => {
                 </svg>
               </button>
             </Card>
+            </div>
           </div>
 
           {/* Right Column - 영업단계별현황 + AI추천 + 중요알림 (30% - 3/10) */}
@@ -639,78 +595,18 @@ const isTodayOrFuture = (date: Date) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className={`space-y-4 ${isMobile ? 'mobile-card-content-small' : ''}`}>
-                {/* 신규문의 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">TA(상담 약속 잡기)</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">45번</span>
-                      <span className="text-sm font-semibold">22%</span>
+                {salesStageData.map((stage) => (
+                  <div key={stage.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{stage.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">{stage.count}번</span>
+                        <span className="text-sm font-semibold">{stage.percentage}%</span>
+                      </div>
                     </div>
+                    <Progress value={stage.percentage} className="h-2" />
                   </div>
-                  <Progress value={22} className="h-2" />
-                </div>
-
-                {/* 상담예약 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">AP(정보 수집)</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">38번</span>
-                      <span className="text-sm font-semibold">18%</span>
-                    </div>
-                  </div>
-                  <Progress value={18} className="h-2" />
-                </div>
-
-                {/* 상담진행 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">PT(상품 제안)</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">32번</span>
-                      <span className="text-sm font-semibold">16%</span>
-                    </div>
-                  </div>
-                  <Progress value={16} className="h-2" />
-                </div>
-
-                {/* 견적제시 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">CL(청약 제안)</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">28번</span>
-                      <span className="text-sm font-semibold">14%</span>
-                    </div>
-                  </div>
-                  <Progress value={14} className="h-2" />
-                </div>
-
-                {/* 상품제안 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">청약(출금 및 제출)</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">24번</span>
-                      <span className="text-sm font-semibold">12%</span>
-                    </div>
-                  </div>
-                  <Progress value={12} className="h-2" />
-                </div>
-
-                {/* 계약성공 */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">증권 전달(리뷰)</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">19번</span>
-                      <span className="text-sm font-semibold">9%</span>
-                    </div>
-                  </div>
-                  <Progress value={9} className="h-2" />
-                </div>
-
+                ))}
               </CardContent>
             </Card>
 
@@ -742,14 +638,7 @@ const isTodayOrFuture = (date: Date) => {
                   };
 
                   const getIconBgColor = (type: string) => {
-                    switch (type) {
-                      case 'birthday':
-                        return 'bg-pink-100 dark:bg-pink-900/50';
-                      case 'follow-up':
-                        return 'bg-orange-100 dark:bg-orange-900/50';
-                      default:
-                        return 'bg-gray-100 dark:bg-gray-900/50';
-                    }
+                    return alertIconColors[type as keyof typeof alertIconColors] || 'bg-gray-100 dark:bg-gray-900/50';
                   };
 
                   return (
