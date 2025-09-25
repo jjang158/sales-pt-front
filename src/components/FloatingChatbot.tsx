@@ -482,7 +482,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
   return (
     <>
-      {/* FAB 컨테이너 - 웹 기준 통일 */}
+      {/* FAB 컨테이너 */}
       <div
         className={`fixed z-50 ${className}`}
         style={{
@@ -520,13 +520,19 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
           </>
         )}
 
-        {/* 챗봇 패널 - 웹 기준 통일 */}
+        {/* 챗봇 패널 - 반응형 크기 */}
         {isOpen && !isFullscreen && (
-          <Card className="
-            shadow-xl rounded-3xl border-border bg-card
-            animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col
-            w-[450px] h-[600px]
-          ">
+          <Card
+            className={`
+              shadow-xl rounded-3xl border-border bg-card
+              animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col
+              ${isMobile
+                ? 'w-[350px] !w-[350px] h-[600px]'
+                : 'w-[450px] h-[600px]'
+              }
+            `}
+            style={isMobile ? { width: '350px' } : undefined}
+          >
               <CardHeader className="border-b border-border shrink-0 rounded-t-3xl pb-3 p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -672,12 +678,12 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                 </div>
               </CardHeader>
               <div className="flex-1 min-h-0 flex flex-col">
-                <ScrollArea className="flex-1 p-6">
+                <div className="flex-1 overflow-y-auto p-6">
                   <div className="max-w-4xl mx-auto space-y-4">
                     {messages.map(renderMessage)}
                     <div ref={messagesEndRef} />
                   </div>
-                </ScrollArea>
+                </div>
 
                 {/* 전체화면 빠른 질문 */}
                 <div className="border-t border-border p-4 shrink-0 bg-card">
