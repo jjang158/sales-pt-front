@@ -22,15 +22,15 @@ export const AppHeader = memo(() => {
 </h1>
     
     <div className="flex items-center gap-4">
-      <button 
-        className="relative p-2 hover:bg-accent rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+      <button
+        className="hidden md:block relative p-2 hover:bg-accent rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
         aria-label="알림 확인 (읽지 않은 알림 1개)"
       >
-        <Bell className="w-5 h-5 text-muted-foreground" />
-        <span className="absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full" aria-hidden="true" />
+        <Bell className="hidden md:block w-5 h-5 text-muted-foreground" />
+        <span className="hidden md:block absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full" aria-hidden="true" />
       </button>
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div
           className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-700 rounded-full flex items-center justify-center"
           role="img"

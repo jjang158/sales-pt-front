@@ -522,7 +522,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       variant="ghost"
                       size="sm"
                       onClick={resetChat}
-                      className="rounded-xl hover:bg-muted transition-colors w-8 h-8"
+                      className="rounded-2xl hover:bg-muted transition-colors w-8 h-8"
                     >
                       <RotateCcw className="w-4 h-4" />
                     </Button>
@@ -530,7 +530,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       variant="ghost"
                       size="sm"
                       onClick={toggleFullscreen}
-                      className="rounded-xl hover:bg-muted transition-colors w-8 h-8"
+                      className="rounded-2xl hover:bg-muted transition-colors w-8 h-8"
                     >
                       <Maximize2 className="w-4 h-4" />
                     </Button>
@@ -538,7 +538,7 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                       variant="ghost"
                       size="sm"
                       onClick={toggleChat}
-                      className="rounded-xl hover:bg-muted transition-colors w-8 h-8"
+                      className="rounded-2xl hover:bg-muted transition-colors w-8 h-8"
                     >
                       <X className="w-4 h-4" />
                     </Button>

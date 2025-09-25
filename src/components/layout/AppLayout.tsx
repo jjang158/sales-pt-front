@@ -31,8 +31,10 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
     return (
       <div className="md:hidden h-screen bg-background flex flex-col safe-area-inset">
         <AppHeader />
-        <main className="flex-1 bg-background/50 page-container overflow-auto" style={{ paddingBottom: '4rem' }}>
+        <main className="flex-1 overflow-auto">
           {children}
+          {/* 네비게이션 바와 동일한 높이의 투명 스페이서 */}
+          <div className="h-16 w-full"></div>
         </main>
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />
       </div>
@@ -41,7 +43,7 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
 
   return (
     <div className="hidden md:block h-screen bg-background p-6 transition-colors duration-300">
-      <div className="h-full bg-card rounded-3xl shadow-xl border border-border/50 flex relative">
+      <div className="bg-card rounded-3xl shadow-xl border border-border/50 flex relative" style={{ height: 'calc(100% - 3.5rem)' }}>
         <Navigation currentPage={currentPage} onNavigate={onNavigate} />
         <div className="flex-1 flex flex-col min-h-0">
           <AppHeader />

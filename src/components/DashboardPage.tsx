@@ -287,7 +287,7 @@ const isTodayOrFuture = (date: Date) => {
           <div className="absolute left-1 top-10 w-2 h-8 bg-gradient-to-r from-orange-400/50 to-transparent rounded-r-full" />
         </>
       )}
-      <div className={`${isMobile ? 'pt-6 pb-20 px-3' : 'pt-4 pb-4 px-4'}`}>
+      <div className={`${isMobile ? 'pt-6 px-3' : 'pt-4 pb-4 px-4'}`}>
 
         {/* Main Content with Side Panels - 70:30 비율로 변경 */}
         <div className={`grid ${isMobile ? 'grid-cols-1 gap-4 mt-0' : 'gap-6 mt-2'}`} style={!isMobile ? { gridTemplateColumns: '7fr 3fr' } : {}}>
@@ -295,17 +295,17 @@ const isTodayOrFuture = (date: Date) => {
           {/* Left Column - 업무진행현황 + 업무리스트 (70% - 7/10) */}
           <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
             {/* 업무 진행 현황 */}
-            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 relative overflow-hidden ${isMobile ? 'mobile-card-compact' : ''}`}>
+            <Card className={`rounded-3xl shadow-lg border-border relative overflow-hidden ${isMobile ? 'mobile-card-compact' : ''}`}>
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-green-500 via-green-600 to-green-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-orange-400 rounded-full shadow-lg animate-pulse" />
-              <CardHeader className={`${isMobile ? 'px-4 pt-4 pb-3' : 'px-6 pt-6 pb-3'}`}>
+              <CardHeader className="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <CheckSquare className="w-5" />
                   업무 진행 현황
                 </CardTitle>
               </CardHeader>
-              <CardContent className={`${isMobile ? 'px-4 pb-4' : 'px-6 pb-6'} space-y-4`}>
+              <CardContent className="space-y-4">
                 <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 gap-4'}`}>
                   {/* DO (할 일) */}
                   <button
@@ -378,7 +378,7 @@ const isTodayOrFuture = (date: Date) => {
 
             {/* 업무 리스트 */}
             <div className="relative">
-            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 overflow-visible ${isMobile ? 'mobile-card-compact' : ''}`}>
+            <Card className={`rounded-3xl shadow-lg border-border overflow-visible ${isMobile ? 'mobile-card-compact' : ''}`}>
               {/* 카드 연결 효과 */}
               <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 rounded-r-sm" />
               <div className="absolute left-0 top-4 w-3 h-3 bg-blue-400 rounded-full shadow-lg animate-pulse" />
@@ -602,7 +602,7 @@ const isTodayOrFuture = (date: Date) => {
           {/* Right Column - 영업단계별현황 + AI추천 + 중요알림 (30% - 3/10) */}
           <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
             {/* 영업 단계별 현황 */}
-            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 ${isMobile ? 'mobile-card-small' : ''}`}>
+            <Card className={`rounded-3xl shadow-lg border-border ${isMobile ? 'mobile-card-small' : ''}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">
                   영업 단계별 현황
@@ -631,7 +631,7 @@ const isTodayOrFuture = (date: Date) => {
             />
 
             {/* 중요 알림 */}
-            <Card className={`rounded-2xl shadow-lg border-border/50 dark:border-border/20 dark:bg-card/50 ${isMobile ? 'mobile-card-small' : ''}`}>
+            <Card className={`rounded-3xl shadow-lg border-border ${isMobile ? 'mobile-card-small' : ''}`}>
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <CheckSquare className="w-4 h-4" />

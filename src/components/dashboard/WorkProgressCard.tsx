@@ -15,14 +15,16 @@ export function WorkProgressCard({ stats, onStageClick }: WorkProgressCardProps)
   const isMobile = useIsMobile();
 
   return (
-    <Card className={`rounded-2xl shadow-lg ${isMobile ? 'mx-4' : ''}`}>
-      <CardHeader className={`${isMobile ? 'px-5 pt-5 pb-3' : 'px-6 pt-6 pb-3'}`}>
-        <CardTitle className={`flex items-center gap-2 ${isMobile ? 'text-lg' : ''}`}>
-          <CheckSquare className={`${isMobile ? 'w-4 h-4' : 'w-5'}`} />
-          do
+    <Card className={`rounded-3xl shadow-lg border-border ${isMobile ? 'mx-4' : ''}`}>
+      <CardHeader className="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-4">
+        <CardTitle className={`${isMobile ? 'text-lg' : ''}`}>
+          <div className="flex items-center gap-2">
+            <CheckSquare className={`${isMobile ? 'w-4 h-4' : 'w-5'}`} />
+            do
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className={`${isMobile ? 'px-5 pb-5' : 'px-6 pb-6'} space-y-4`}>
+      <CardContent className="space-y-4">
         <div className={`grid ${isMobile ? 'grid-cols-2 gap-3' : 'grid-cols-1 md:grid-cols-2 gap-4'}`}>
           {/* DO (할 일) */}
           <button

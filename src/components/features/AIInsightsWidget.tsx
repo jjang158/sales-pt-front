@@ -133,12 +133,12 @@ export const AIInsightsWidget = memo<AIInsightsWidgetProps>(({ overdueTodos = []
   };
 
   return (
-    <Card className={`rounded-3xl shadow-lg overflow-hidden relative group ai-hover-scale ai-glow-effect ai-fade-in ${isMobile ? 'mobile-card-small' : ''}`}>
+    <Card className={`rounded-3xl shadow-lg border-border overflow-hidden relative group ai-hover-scale ai-glow-effect ai-fade-in ${isMobile ? 'mobile-card-small' : ''}`}>
       {/* 보라색 네온 그라데이션 배경 */}
       <div className="absolute inset-0 ai-neon-gradient" />
 
       <div className="relative">
-        <CardHeader className="pb-3">
+        <CardHeader className="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle className={`flex items-center gap-2 ${isMobile ? 'text-base' : 'text-xl'}`}>
               <div className="p-2 rounded-xl ai-icon-gradient text-white shadow-lg">
@@ -152,7 +152,7 @@ export const AIInsightsWidget = memo<AIInsightsWidgetProps>(({ overdueTodos = []
               variant="ghost"
               size="sm"
               onClick={handleRefresh}
-              className="rounded-xl hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
+              className="rounded-2xl hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
               disabled={isRefreshing}
             >
               <RefreshCw className={`w-4 h-4 text-purple-600 dark:text-purple-400 ${isRefreshing ? 'animate-spin' : ''}`} />

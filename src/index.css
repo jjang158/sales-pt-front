@@ -3762,13 +3762,15 @@
       min-height: 100vh;
     }
 
+    /* iOS 스타일 반투명 배경 */
     .mobile-backdrop-blur {
+      backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      background-color: #fffc;
+      background-color: rgba(255, 255, 255, 0.8);
     }
 
     .dark .mobile-backdrop-blur {
-      background-color: #000000b3;
+      background-color: rgba(0, 0, 0, 0.7);
     }
   }
 
@@ -3776,6 +3778,7 @@
     transition: transform .1s;
     transform: scale(.98);
   }
+
 
   .scroll-snap-x {
     scroll-snap-type: x mandatory;
@@ -3939,7 +3942,11 @@
   --chart-3: oklch(.45 .08 135);
   --chart-4: oklch(.75 .18 148);
   --chart-5: oklch(.7 .14 125);
-  --radius: .625rem;
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --sidebar: oklch(.985 0 0);
   --sidebar-foreground: oklch(.145 0 0);
   --sidebar-primary: #030213;
