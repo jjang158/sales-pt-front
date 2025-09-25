@@ -29,7 +29,7 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
 
   if (isMobile) {
     return (
-      <div className="md:hidden h-screen bg-background flex flex-col safe-area-inset">
+      <div className="md:hidden h-screen bg-background flex flex-col">
         <AppHeader />
         <main className="flex-1 overflow-auto">
           {children}

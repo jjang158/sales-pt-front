@@ -24,7 +24,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
 
   if (isMobile) {
     return (
-      <nav className="md:hidden bg-card border-t border-border shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/80 rounded-t-xl">
+      <nav className="md:hidden bg-card border-t border-border shadow-lg backdrop-blur supports-[backdrop-filter]:bg-card/80 rounded-t-xl mobile-safe-bottom">
         <div className="grid grid-cols-4 h-16 max-w-md mx-auto px-safe">
           {[...navigationItems, settingsItem].map((item) => {
             const Icon = item.icon;
