@@ -9,11 +9,24 @@ interface ImportMetaEnv {
   readonly VITE_DEBUG: string;
 }
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// 플랫폼별 API URL 설정
+const getApiUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+  // 현재 환경 정보 로그 (개발 환경에서만)
+  if (import.meta.env.DEV) {
+    console.log('🔍 API URL 설정:', {
+      location: window.location,
+      envUrl,
+      isCapacitor: window.location.protocol === 'https:' && window.location.hostname === 'localhost'
+    });
+  }
+
+  return envUrl;
+};
+
+const API_BASE_URL = getApiUrl();
 
 // =============================================================================
 // Common Types
@@ -202,6 +215,29 @@ export interface ChatbotResponse {
   data: ChatbotResponseData;
 }
 
+// 파일 업로드 관련 타입
+export interface FileUploadRequest {
+  question: string;
+  files: File[];
+  q_history?: ChatMessage[];
+}
+
+export interface UploadedFileInfo {
+  filename: string;
+  file_path: string;
+  content_type: string;
+}
+
+export interface ChatbotFileResponseData extends ChatbotResponseData {
+  uploaded_files: string[];
+}
+
+export interface ChatbotFileResponse {
+  status: number;
+  message: string;
+  data: ChatbotFileResponseData;
+}
+
 // =============================================================================
 // Sales Metadata Types
 // =============================================================================
@@ -235,17 +271,25 @@ export interface SalesMetaResponse {
 
 async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const config: RequestInit = {
     headers: {
-      'Content-Type': 'application/json',
+      // FormData인 경우 Content-Type을 설정하지 않음 (브라우저가 자동 설정)
+      ...(!(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
     ...options,
   };
 
+  if (import.meta.env.DEV) {
+    console.log('🌐 API 요청:', { url, method: config.method || 'GET', API_BASE_URL });
+  }
+
   try {
     const response = await fetch(url, config);
+    if (import.meta.env.DEV) {
+      console.log('✅ API 응답:', { status: response.status, ok: response.ok, url });
+    }
     
     if (!response.ok) {
       let errorData;
@@ -271,10 +315,14 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
     
     return {} as T;
   } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error('❌ API 요청 실패:', { url, error });
+    }
+
     if (error instanceof APIError) {
       throw error;
     }
-    
+
     const message = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
     throw new APIError(0, message, error);
   }
@@ -450,7 +498,52 @@ export const consultAPI = {
       method: 'POST',
       body: JSON.stringify(requestData),
     });
-    
+
+    return response.data;
+  },
+
+  // PDF 파일 업로드 (백엔드 벡터화용)
+  uploadPdfFile: async (file: File, userId: number): Promise<void> => {
+    const formData = new FormData();
+
+    formData.append('pdf_file', file);
+    formData.append('user_id', userId.toString());
+
+    await fetchAPI<APIResponse<{}>>('/api/chatbot/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
+  // 파일과 함께 챗봇에게 질문 전송
+  sendChatMessageWithFiles: async (
+    question: string,
+    files: File[],
+    history?: ChatMessage[]
+  ): Promise<ChatbotFileResponseData> => {
+    const formData = new FormData();
+
+    // 질문 추가
+    formData.append('question', question);
+
+    // 히스토리 추가 (있는 경우)
+    if (history && history.length > 0) {
+      formData.append('q_history', JSON.stringify(history));
+    }
+
+    // 파일들 추가
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    const response = await fetchAPI<ChatbotFileResponse>('/api/chatbot/upload', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        // Content-Type을 제거하여 브라우저가 자동으로 multipart/form-data 설정하도록 함
+      } as HeadersInit,
+    });
+
     return response.data;
   }
 };

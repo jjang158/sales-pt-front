@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, User, Bell, Shield, Palette, Globe, Database, Mic } from 'lucide-react';
+import { ArrowLeft, User, Bell, Shield, Palette, Globe, Database, Mic, LogOut } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
@@ -12,9 +12,10 @@ import type { Page } from '../types';
 //설정 페이지 
 interface SettingsPageProps {
   onNavigate: (page: Page) => void;
+  logout?: () => void;
 }
 
-export function SettingsPage({ onNavigate }: SettingsPageProps) {
+export function SettingsPage({ onNavigate, logout }: SettingsPageProps) {
   const [settings, setSettings] = useState({
     notifications: true,
     autoSave: true,
@@ -32,14 +33,14 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
   };
 
   return (
-    <div className="h-full overflow-auto scrollbar-styled bg-gray-50/50 flex flex-col">
+    <div className="h-full overflow-hidden bg-gray-50/50 flex flex-col">
       {/* Page Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex-shrink-0">
         <div className="flex h-16 items-center px-6">
           <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => onNavigate('dashboard')}
               className="rounded-lg"
             >
@@ -57,8 +58,9 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8 overflow-auto">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <div className="flex-1 overflow-auto scrollbar-styled">
+        <div className="p-8 pb-20">
+          <div className="max-w-4xl mx-auto space-y-8">
           
           {/* 프로필 설정 */}
           <Card className="rounded-2xl shadow-sm">
@@ -288,18 +290,35 @@ export function SettingsPage({ onNavigate }: SettingsPageProps) {
                   2단계 인증 설정
                 </Button>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-4">
                 <h4 className="font-medium">데이터 보호</h4>
                 <p className="text-sm text-muted-foreground">
                   모든 음성 데이터는 256-bit AES 암호화로 보호되며, 개인정보는 엄격히 관리됩니다.
                 </p>
               </div>
+
+              <Separator />
+
+              <div className="space-y-4">
+                <h4 className="font-medium">계정 관리</h4>
+                {logout && (
+                  <Button
+                    variant="destructive"
+                    className="rounded-xl w-full md:w-auto"
+                    onClick={logout}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    로그아웃
+                  </Button>
+                )}
+              </div>
             </CardContent>
           </Card>
 
+          </div>
         </div>
       </div>
     </div>

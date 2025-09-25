@@ -17,7 +17,7 @@ export default function App() {
       <AppLayout currentPage={state.currentPage} onNavigate={actions.navigateTo}>
         <PageRouter {...state} {...actions} />
       </AppLayout>
-      <FloatingChatbot />
+      {state.currentPage !== 'login' && <FloatingChatbot />}
     </ThemeProvider>
   );
 }

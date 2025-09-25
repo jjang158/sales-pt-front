@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { todoAPI, TodoItem, APIError, apiUtils, TodoListParams } from '../lib/api';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { todoAPI, TodoItem, apiUtils, TodoListParams } from '../lib/api';
 
 export interface TodoListState {
   todos: TodoItem[];
@@ -163,7 +163,9 @@ export function useTodoList(options: UseTodoListOptions = {}) {
     await todoAPI.toggleTodoComplete(todoId, !todo.is_completed);
     
     // 성공했지만 다시 불러오지 않음 (낙관적 업데이트 유지)
-    console.log('Todo 상태 변경 성공:', todoId);
+    if (import.meta.env.DEV) {
+      console.log('Todo 상태 변경 성공:', todoId);
+    }
     
   } catch (error) {
     if (!mountedRef.current) throw error;
@@ -240,29 +242,37 @@ export function useTodoList(options: UseTodoListOptions = {}) {
     setState(prev => ({ ...prev, error: null }));
   }, []);
 
-  // 통계 정보 계산 (useMemo 사용 권장하지만 여기서는 단순하게)
-  const stats = {
-  total: (state.todos || []).length,
-  completed: (state.todos || []).filter(t => t && t.is_completed).length,
-  incomplete: (state.todos || []).filter(t => t && !t.is_completed).length,
-  completionRate: (state.todos || []).length > 0 
-    ? Math.round(((state.todos || []).filter(t => t && t.is_completed).length / (state.todos || []).length) * 100)
-    : 0
-};
+  // 통계 정보 계산 - useMemo로 최적화
+  const stats = useMemo(() => {
+    const todos = state.todos || [];
+    const completed = todos.filter(t => t?.is_completed).length;
+    const total = todos.length;
 
-  const todayTodos = (state.todos || []).filter(todo => {
-  if (!todo || !todo.due_date) return false;  // todo 자체도 체크
-  const today = new Date();
-  const dueDate = new Date(todo.due_date);
-  return dueDate.toDateString() === today.toDateString();
-});
+    return {
+      total,
+      completed,
+      incomplete: total - completed,
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+    };
+  }, [state.todos]);
 
-const overdueTodos = (state.todos || []).filter(todo => {
-  if (!todo || !todo.due_date || todo.is_completed) return false;  // todo 자체도 체크
-  const today = new Date();
-  const dueDate = new Date(todo.due_date);
-  return dueDate < today;
-});
+  const todayTodos = useMemo(() => {
+    const today = new Date().toDateString();
+    return (state.todos || []).filter(todo => {
+      if (!todo?.due_date) return false;
+      const dueDate = new Date(todo.due_date);
+      return dueDate.toDateString() === today;
+    });
+  }, [state.todos]);
+
+  const overdueTodos = useMemo(() => {
+    const today = new Date();
+    return (state.todos || []).filter(todo => {
+      if (!todo?.due_date || todo.is_completed) return false;
+      const dueDate = new Date(todo.due_date);
+      return dueDate < today;
+    });
+  }, [state.todos]);
   // 초기 로딩
   useEffect(() => {
     if (autoLoad) {
