@@ -502,6 +502,19 @@ export const consultAPI = {
     return response.data;
   },
 
+  // PDF 파일 업로드 (백엔드 벡터화용)
+  uploadPdfFile: async (file: File, userId: number): Promise<void> => {
+    const formData = new FormData();
+
+    formData.append('pdf_file', file);
+    formData.append('user_id', userId.toString());
+
+    await fetchAPI<APIResponse<{}>>('/api/chatbot/upload', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
   // 파일과 함께 챗봇에게 질문 전송
   sendChatMessageWithFiles: async (
     question: string,
@@ -519,7 +532,7 @@ export const consultAPI = {
     }
 
     // 파일들 추가
-    files.forEach((file, index) => {
+    files.forEach((file) => {
       formData.append('files', file);
     });
 

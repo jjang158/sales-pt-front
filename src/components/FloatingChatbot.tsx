@@ -252,12 +252,28 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // 파일 업로드 핸들러
-  const handleFileSelect = useCallback((files: File[]) => {
+  const handleFileSelect = useCallback(async (files: File[]) => {
     if (files.length > 0) {
-      setSelectedFiles(files);
-      const fileNames = files.map(f => f.name).join(', ');
-      const fileMessage = `📎 파일 첨부: ${fileNames}`;
-      setMessage(prev => prev ? `${prev}\n${fileMessage}` : fileMessage);
+      try {
+        // 임시 사용자 ID (실제로는 로그인된 사용자 정보에서 가져와야 함)
+        const userId = 1;
+
+        // PDF 파일들을 백엔드에 업로드
+        for (const file of files) {
+          if (file.name.toLowerCase().endsWith('.pdf')) {
+            await consultAPI.uploadPdfFile(file, userId);
+          }
+        }
+
+        setSelectedFiles(files);
+        const fileNames = files.map(f => f.name).join(', ');
+        const fileMessage = `📎 파일 첨부 완료: ${fileNames}`;
+        setMessage(prev => prev ? `${prev}\n${fileMessage}` : fileMessage);
+      } catch (error) {
+        console.error('파일 업로드 실패:', error);
+        const errorMessage = `❌ 파일 업로드 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`;
+        setMessage(prev => prev ? `${prev}\n${errorMessage}` : errorMessage);
+      }
     }
   }, []);
 

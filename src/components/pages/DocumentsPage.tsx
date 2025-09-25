@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Plus, Search, Filter, FileText, Upload } from 'lucide-react';
+import { Plus, Search, Filter, FileText, Upload, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -7,6 +7,7 @@ import { FileUpload } from '../ui/file-upload';
 import { PDFViewer, FileManager } from '../ui/pdf-viewer';
 import { useIsMobile } from '../ui/use-mobile';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { consultAPI } from '../../lib/api';
 
 interface Document {
   id: string;
@@ -24,20 +25,41 @@ export function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileUpload = useCallback((files: File[]) => {
-    const newDocuments: Document[] = files.map(file => ({
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      type: file.name.toLowerCase().includes('보험') ? 'insurance' :
-            file.name.toLowerCase().includes('계약') ? 'contract' : 'other',
-      file,
-      uploadDate: new Date().toLocaleDateString('ko-KR'),
-      tags: []
-    }));
+  const handleFileUpload = useCallback(async (files: File[]) => {
+    setIsUploading(true);
 
-    setDocuments(prev => [...prev, ...newDocuments]);
-    setShowUpload(false);
+    try {
+      // 임시 사용자 ID (실제로는 로그인된 사용자 정보에서 가져와야 함)
+      const userId = 1;
+
+      for (const file of files) {
+        // PDF 파일만 백엔드에 업로드
+        if (file.name.toLowerCase().endsWith('.pdf')) {
+          await consultAPI.uploadPdfFile(file, userId);
+        }
+      }
+
+      // UI에 문서 추가
+      const newDocuments: Document[] = files.map(file => ({
+        id: Math.random().toString(36).substr(2, 9),
+        name: file.name,
+        type: file.name.toLowerCase().includes('보험') ? 'insurance' :
+              file.name.toLowerCase().includes('계약') ? 'contract' : 'other',
+        file,
+        uploadDate: new Date().toLocaleDateString('ko-KR'),
+        tags: []
+      }));
+
+      setDocuments(prev => [...prev, ...newDocuments]);
+      setShowUpload(false);
+    } catch (error) {
+      console.error('파일 업로드 실패:', error);
+      alert('파일 업로드 중 오류가 발생했습니다.');
+    } finally {
+      setIsUploading(false);
+    }
   }, []);
 
   const removeDocument = useCallback((id: string) => {
@@ -91,14 +113,23 @@ export function DocumentsPage() {
             </DialogTrigger>
             <DialogContent className={`${isMobile ? 'w-[95vw]' : 'max-w-2xl'}`}>
               <DialogHeader>
-                <DialogTitle>문서 업로드</DialogTitle>
+                <DialogTitle>
+                  {isUploading ? '문서 업로드 중...' : '문서 업로드'}
+                </DialogTitle>
               </DialogHeader>
-              <FileUpload
-                onFileSelect={handleFileUpload}
-                accept=".pdf,.doc,.docx,.txt"
-                multiple={true}
-                maxSize={50}
-              />
+              {isUploading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-8 h-8 animate-spin mr-2" />
+                  <span>파일을 업로드하고 처리하고 있습니다...</span>
+                </div>
+              ) : (
+                <FileUpload
+                  onFileSelect={handleFileUpload}
+                  accept=".pdf,.doc,.docx,.txt"
+                  multiple={true}
+                  maxSize={50}
+                />
+              )}
             </DialogContent>
           </Dialog>
         </div>
@@ -255,7 +286,7 @@ export function DocumentsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent) => {
                           e.stopPropagation();
                           removeDocument(doc.id);
                         }}
