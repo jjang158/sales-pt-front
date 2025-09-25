@@ -318,19 +318,19 @@ const isTodayOrFuture = (date: Date) => {
                           <Clock className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
                         </div>
                       )}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
                         {isMobile && (
                           <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-orange-500 rounded-full flex items-center justify-center`}>
                             <Clock className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
                           </div>
                         )}
-                        <span className="text-sm text-orange-800 dark:text-orange-300">할 일</span>
+                        <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>할 일</span>
                         <div className={isMobile ? 'text-center' : 'text-right'}>
-                          <div className={isMobile ? 'flex items-center justify-center gap-1' : ''}>
-                            <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>
+                          <div className={isMobile ? 'inline-flex items-baseline gap-1' : ''}>
+                            <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>
                               {stats.incomplete}
-                            </p>
-                            <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-orange-600 dark:text-orange-500`}>개</p>
+                            </span>
+                            <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-orange-700 dark:text-orange-400`}>개</span>
                           </div>
                         </div>
                       </div>
@@ -345,25 +345,25 @@ const isTodayOrFuture = (date: Date) => {
                     className={`${isMobile ? '' : 'text-left'} bg-green-50 dark:bg-green-900/20 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors cursor-pointer group ${isMobile ? 'p-3' : 'p-4'}`}
                     onClick={() => handleStageClick('DONE')}
                   >
-                    <div className={`flex items-center ${isMobile ? 'justify-between mb-2' : 'justify-between mb-4'}`}>
+                    <div className={`flex items-center ${isMobile ? 'justify-between mb-2' : 'justify-between mb-3'}`}>
                       {!isMobile && (
                         <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-green-500 rounded-full flex items-center justify-center`}>
                           <CheckSquare className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
                         </div>
                       )}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
                         {isMobile && (
                           <div className={`${isMobile ? 'w-7 h-7' : 'w-10 h-10'} bg-green-500 rounded-full flex items-center justify-center`}>
                             <CheckSquare className={`${isMobile ? 'w-3.5 h-3.5' : 'w-5 h-5'} text-white`} />
                           </div>
                         )}
-                        <span className="text-sm text-green-800 dark:text-green-300">완료</span>
+                        <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>완료</span>
                         <div className={isMobile ? 'text-center' : 'text-right'}>
-                          <div className={isMobile ? 'flex items-center justify-center gap-1' : ''}>
-                            <p className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>
+                          <div className={isMobile ? 'inline-flex items-baseline gap-1' : ''}>
+                            <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>
                               {stats.completed}
-                            </p>
-                            <p className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-green-600 dark:text-green-500`}>개</p>
+                            </span>
+                            <span className={`${isMobile ? 'text-lg' : 'text-2xl'} font-bold text-green-700 dark:text-green-400`}>개</span>
                           </div>
                         </div>
                       </div>

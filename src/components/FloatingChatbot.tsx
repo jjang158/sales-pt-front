@@ -53,7 +53,6 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
   // 반응형 전환 중에도 항상 버튼이 보이도록 보장
   const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -522,16 +521,15 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
         {/* 챗봇 패널 - 반응형 크기 */}
         {isOpen && !isFullscreen && (
-          <Card
-            className={`
-              shadow-xl rounded-3xl border-border bg-card
-              animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col
-              ${isMobile
-                ? 'w-[350px] !w-[350px] h-[600px]'
-                : 'w-[450px] h-[600px]'
-              }
-            `}
-            style={isMobile ? { width: '350px' } : undefined}
+          <Card className={`
+            shadow-xl rounded-3xl border-border bg-card
+            animate-in fade-in slide-in-from-bottom-4 duration-300 flex flex-col
+            ${isMobile
+              ? 'w-[350px] !w-[350px] h-[600px]'
+              : 'w-[450px] h-[600px]'
+            }
+          `}
+          style={isMobile ? { width: '350px' } : undefined}
           >
               <CardHeader className="border-b border-border shrink-0 rounded-t-3xl pb-3 p-4">
                 <div className="flex items-center justify-between">
