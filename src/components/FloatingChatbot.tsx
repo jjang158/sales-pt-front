@@ -48,6 +48,22 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showFileUpload, setShowFileUpload] = useState(false);
+  const [useQuery2, setUseQuery2] = useState(false);
+  const useQuery2Ref = useRef(false);
+
+  // 키보드 높이 감지 상태
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // 토글 상태 변경 디버깅
+  const handleToggleChange = (newValue: boolean) => {
+    console.log('🔄 토글 상태 변경:', {
+      이전값: useQuery2,
+      새값: newValue,
+      서버: newValue ? 'Llama (Query2)' : 'GPT (Query1)'
+    });
+    setUseQuery2(newValue);
+    useQuery2Ref.current = newValue; // ref에도 즉시 반영
+  };
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -56,6 +72,54 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // 키보드 높이 감지 (Visual Viewport API 사용)
+  useEffect(() => {
+    if (!isMobile || !isFullscreen) return;
+
+    const handleViewportChange = () => {
+      if (window.visualViewport) {
+        const windowHeight = window.innerHeight;
+        const viewportHeight = window.visualViewport.height;
+        const heightDifference = windowHeight - viewportHeight;
+
+        // 키보드가 올라왔을 때만 높이 계산 (50px 이상 차이가 날 때)
+        const newKeyboardHeight = heightDifference > 50 ? heightDifference : 0;
+        setKeyboardHeight(newKeyboardHeight);
+
+        console.log('🎹 키보드 높이 감지:', {
+          windowHeight,
+          viewportHeight,
+          heightDifference,
+          keyboardHeight: newKeyboardHeight
+        });
+      }
+    };
+
+    // Visual Viewport API 지원 확인
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+
+      // 초기 값 설정
+      handleViewportChange();
+
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      };
+    } else {
+      // Fallback: window resize 이벤트 사용
+      const handleResize = () => {
+        const initialHeight = window.innerHeight;
+        const currentHeight = window.innerHeight;
+        const heightDifference = initialHeight - currentHeight;
+        const newKeyboardHeight = heightDifference > 50 ? heightDifference : 0;
+        setKeyboardHeight(newKeyboardHeight);
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [isMobile, isFullscreen]);
 
   // 드래그 관련 상태 - 웹 기준 통일
   const [position, setPosition] = useState<Position>({ x: 40, y: 80 });
@@ -142,10 +206,10 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
   // 드래그 관련 함수들
   const constrainPosition = useCallback((pos: Position): Position => {
-    const maxX = isMobile ? 100 : 200;
+    const maxX = isMobile ? pos.x : 200; // 모바일에서는 가로 고정, 데스크톱에서는 200까지
     return {
-      x: Math.max(20, Math.min(maxX, pos.x)),
-      y: Math.max(20, Math.min(200, pos.y))
+      x: isMobile ? pos.x : Math.max(20, Math.min(maxX, pos.x)), // 모바일에서는 x축 움직임 제한
+      y: Math.max(20, Math.min(200, pos.y)) // 세로는 200px까지
     };
   }, [isMobile]);
 
@@ -161,12 +225,12 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
     const deltaX = dragStart.x - clientX;
     const deltaY = clientY - dragStart.y;
     const newPosition = constrainPosition({
-      x: position.x + deltaX,
+      x: isMobile ? position.x : position.x + deltaX, // 모바일에서는 x축 변경 없음
       y: position.y - deltaY
     });
     setPosition(newPosition);
     setDragStart({ x: clientX, y: clientY });
-  }, [isDragging, dragStart, position, constrainPosition]);
+  }, [isDragging, dragStart, position, constrainPosition, isMobile]);
 
   const handleDragEnd = useCallback(() => {
     if (!isDragging) return;
@@ -318,13 +382,36 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
       const history = getApiHistory();
       let response;
 
+      // 최신 토글 상태 사용 (ref로 즉시 반영)
+      const currentUseQuery2 = useQuery2Ref.current;
+
+      // 디버깅 로그
+      console.log('🔍 API 호출 디버깅:', {
+        hasFiles,
+        useQuery2State: useQuery2,
+        useQuery2Ref: currentUseQuery2,
+        hasQuery2Function: !!consultAPI.sendChatMessage2,
+        hasQueryFunction: !!consultAPI.sendChatMessage,
+        currentMessage: textToSend.substring(0, 50) + '...'
+      });
+
       if (hasFiles && consultAPI.sendChatMessageWithFiles) {
+        console.log('📁 파일 업로드 API 호출 → /api/chatbot/upload');
         response = await consultAPI.sendChatMessageWithFiles(textToSend, selectedFiles, history);
+      } else if (currentUseQuery2 && consultAPI.sendChatMessage2) {
+        console.log('🦙 Query2 (Llama) API 호출 → /api/chatbot/query2');
+        response = await consultAPI.sendChatMessage2(textToSend, history);
       } else if (consultAPI.sendChatMessage) {
+        console.log('🤖 Query1 (GPT) API 호출 → /api/chatbot/query');
         response = await consultAPI.sendChatMessage(textToSend, history);
       } else {
         throw new Error('API 서비스를 사용할 수 없습니다.');
       }
+
+      console.log('✅ API 응답 수신:', {
+        answer: response?.answer?.substring(0, 50) + '...',
+        sourcesCount: response?.sources?.length || 0
+      });
 
       const botMessage: Message = {
         id: loadingMessage.id,
@@ -534,7 +621,52 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
               <CardHeader className="border-b border-border shrink-0 rounded-t-3xl pb-3 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-lg font-medium">AI 어시스턴트</CardTitle>
+                    <div className="flex items-center justify-center gap-2">
+                      <CardTitle className="text-sm font-medium">AI 어시스턴트</CardTitle>
+                      <div className="relative flex items-center justify-center rounded-full p-0.5" style={{ backgroundColor: '#f3f4f6', minWidth: '80px' }}>
+                        {/* 슬라이딩 배경 - 인라인 스타일로 강제 적용 */}
+                        <div
+                          className="absolute rounded-full transition-all duration-300 ease-out shadow-sm"
+                          style={{
+                            top: '2px',
+                            bottom: '2px',
+                            width: 'calc(50% - 1px)',
+                            left: !useQuery2 ? '2px' : 'auto',
+                            right: useQuery2 ? '2px' : 'auto',
+                            backgroundColor: !useQuery2 ? '#000000' : '#3b82f6',
+                            zIndex: 1
+                          }}
+                        />
+                        <button
+                          onClick={() => handleToggleChange(false)}
+                          className="relative px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 flex-1 text-center justify-center items-center"
+                          style={{
+                            zIndex: 10,
+                            color: !useQuery2 ? '#ffffff' : '#6b7280',
+                            fontSize: '10px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          GPT
+                        </button>
+                        <button
+                          onClick={() => handleToggleChange(true)}
+                          className="relative px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 flex-1 text-center justify-center items-center"
+                          style={{
+                            zIndex: 10,
+                            color: useQuery2 ? '#ffffff' : '#6b7280',
+                            fontSize: '10px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          Llama
+                        </button>
+                      </div>
+                    </div>
                     <p className="text-xs text-muted-foreground compact-line-height">고객 정보 검색·상담 지원</p>
                   </div>
                   <div className="flex items-center gap-1">
@@ -660,23 +792,85 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
 
         {/* 전체화면 모드 */}
         {isOpen && isFullscreen && (
-          <div className="fixed inset-0 z-50 bg-background">
-            <Card className="w-full h-full rounded-none border-0 bg-background flex flex-col">
+          <div className="fixed inset-0 z-50 bg-background" style={{ height: '100dvh' }}>
+            <Card className="w-full h-full rounded-none border-0 bg-background flex flex-col" style={{ height: '100dvh' }}>
               <CardHeader className="pb-4 border-b shrink-0">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">AI 어시스턴트</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleFullscreen}
-                    className="w-8 h-8 p-0"
-                  >
-                    <Minimize2 className="w-4 h-4" />
-                  </Button>
+                  <div>
+                    <div className="flex items-center justify-center gap-3">
+                      <CardTitle className="text-xl">AI 어시스턴트</CardTitle>
+                      <div className="relative flex items-center justify-center rounded-full p-0.5" style={{ backgroundColor: '#f3f4f6', minWidth: '90px' }}>
+                        {/* 슬라이딩 배경 - 인라인 스타일로 강제 적용 */}
+                        <div
+                          className="absolute rounded-full transition-all duration-300 ease-out shadow-sm"
+                          style={{
+                            top: '2px',
+                            bottom: '2px',
+                            width: 'calc(50% - 1px)',
+                            left: !useQuery2 ? '2px' : 'auto',
+                            right: useQuery2 ? '2px' : 'auto',
+                            backgroundColor: !useQuery2 ? '#000000' : '#3b82f6',
+                            zIndex: 1
+                          }}
+                        />
+                        <button
+                          onClick={() => handleToggleChange(false)}
+                          className="relative px-2 py-1 rounded-full text-sm font-medium transition-colors duration-200 flex-1 text-center justify-center items-center"
+                          style={{
+                            zIndex: 10,
+                            color: !useQuery2 ? '#ffffff' : '#6b7280',
+                            fontSize: '11px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          GPT
+                        </button>
+                        <button
+                          onClick={() => handleToggleChange(true)}
+                          className="relative px-2 py-1 rounded-full text-sm font-medium transition-colors duration-200 flex-1 text-center justify-center items-center"
+                          style={{
+                            zIndex: 10,
+                            color: useQuery2 ? '#ffffff' : '#6b7280',
+                            fontSize: '11px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                          }}
+                        >
+                          Llama
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">고객 정보 검색·상담 지원</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={toggleFullscreen}
+                      className="w-8 h-8 p-0"
+                    >
+                      <Minimize2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
-              <div className="flex-1 min-h-0 flex flex-col">
-                <div className="flex-1 overflow-y-auto p-6">
+              <div
+                className="flex-1 min-h-0 flex flex-col"
+                style={{
+                  maxHeight: keyboardHeight > 0
+                    ? `calc(100dvh - ${keyboardHeight + 100}px)`
+                    : 'calc(100dvh - 200px)'
+                }}
+              >
+                <div
+                  className="flex-1 overflow-y-auto p-6"
+                  style={{
+                    paddingBottom: keyboardHeight > 0 ? '20px' : '120px'
+                  }}
+                >
                   <div className="max-w-4xl mx-auto space-y-4">
                     {messages.map(renderMessage)}
                     <div ref={messagesEndRef} />
@@ -704,8 +898,17 @@ export function FloatingChatbot({ className = '' }: FloatingChatbotProps) {
                   </div>
                 </div>
 
-                {/* 전체화면 입력 섹션 */}
-                <div className="border-t border-border p-6 shrink-0 bg-card">
+                {/* 전체화면 입력 섹션 - 동적 키보드 높이 대응 */}
+                <div
+                  className="border-t border-border p-6 shrink-0 bg-card safe-area-inset-bottom"
+                  style={{
+                    paddingBottom: keyboardHeight > 0
+                      ? 'max(24px, env(safe-area-inset-bottom))'
+                      : 'max(24px, env(safe-area-inset-bottom))',
+                    transform: keyboardHeight > 0 ? `translateY(-${Math.max(0, keyboardHeight - 250)}px)` : 'none',
+                    transition: 'transform 0.3s ease-out'
+                  }}
+                >
                   <div className="max-w-4xl mx-auto">
                     <div className="flex items-center gap-4">
                       <div className="flex-1 relative">

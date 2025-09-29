@@ -275,7 +275,7 @@ async function fetchAPI<T>(endpoint: string, options: RequestInit = {}): Promise
   const config: RequestInit = {
     headers: {
       // FormData인 경우 Content-Type을 설정하지 않음 (브라우저가 자동 설정)
-      ...(!(options.body instanceof FormData) && { 'Content-Type': 'application/json' }),
+      ...(!(options.body instanceof FormData) && options.body && { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
     ...options,
@@ -487,7 +487,7 @@ export const consultAPI = {
     return response.data.list;
   },
 
-  // 챗봇에게 질문 전송
+  // 챗봇에게 질문 전송 (기존 서버)
   sendChatMessage: async (question: string, history?: ChatMessage[]): Promise<ChatbotResponseData> => {
     const requestData: ChatbotRequest = {
       question,
@@ -496,6 +496,29 @@ export const consultAPI = {
 
     const response = await fetchAPI<ChatbotResponse>('/api/chatbot/query', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': '1'
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    return response.data;
+  },
+
+  // 챗봇에게 질문 전송 (새로운 query2 서버)
+  sendChatMessage2: async (question: string, history?: ChatMessage[]): Promise<ChatbotResponseData> => {
+    const requestData: ChatbotRequest = {
+      question,
+      ...(history && history.length > 0 && { q_history: history })
+    };
+
+    const response = await fetchAPI<ChatbotResponse>('/api/chatbot/query2', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Id': '1'
+      },
       body: JSON.stringify(requestData),
     });
 
@@ -511,6 +534,9 @@ export const consultAPI = {
 
     await fetchAPI<APIResponse<{}>>('/api/chatbot/upload', {
       method: 'POST',
+      headers: {
+        'X-User-Id': userId.toString()
+      },
       body: formData,
     });
   },
@@ -538,10 +564,11 @@ export const consultAPI = {
 
     const response = await fetchAPI<ChatbotFileResponse>('/api/chatbot/upload', {
       method: 'POST',
-      body: formData,
       headers: {
-        // Content-Type을 제거하여 브라우저가 자동으로 multipart/form-data 설정하도록 함
-      } as HeadersInit,
+        'X-User-Id': '1'
+      },
+      body: formData,
+      // Content-Type을 제거하여 브라우저가 자동으로 multipart/form-data 설정하도록 함
     });
 
     return response.data;

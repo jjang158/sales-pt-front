@@ -10,8 +10,11 @@ export const AppHeader = memo(() => {
 
   return (
     //서비스 명 색 변경 (그라데이션-그린 > 검은색 단색)
-    <header className={`bg-card/95 dark:bg-card/50 backdrop-blur-sm border-b border-border/50 dark:border-border/20 mobile-safe-top mobile-safe-left mobile-safe-right ${isMobile ? 'pt-safe-top' : ''}`}>
-      <div className={`px-6 flex items-center justify-between ${isMobile ? 'py-2 pt-4' : 'py-4'}`}>
+    <header className={`bg-card/95 dark:bg-card/50 backdrop-blur-sm border-b border-border/50 dark:border-border/20 mobile-safe-top`}
+      style={{
+        paddingTop: isMobile ? 'max(env(safe-area-inset-top), 20px)' : undefined
+      }}>
+      <div className={`px-6 flex items-center justify-between py-4`}>
    <h1
   className="font-bold select-none text-black dark:text-white text-2xl"
   style={{

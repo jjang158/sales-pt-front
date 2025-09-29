@@ -29,9 +29,9 @@ export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, childr
 
   if (isMobile) {
     return (
-      <div className="md:hidden h-screen bg-background flex flex-col">
+      <div className="md:hidden h-screen bg-background flex flex-col mobile-safe-left mobile-safe-right">
         <AppHeader />
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto mobile-safe-bottom">
           {children}
           {/* 네비게이션 바와 동일한 높이의 투명 스페이서 */}
           <div className="h-16 w-full"></div>
