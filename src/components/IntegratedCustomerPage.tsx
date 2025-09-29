@@ -423,7 +423,7 @@ export function IntegratedCustomerPage({
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
+    <div className="h-full flex flex-col bg-gray-50 pb-safe md:pb-0 pt-safe">
       {/* Search and Filter Bar - Only show in overview mode */}
       {viewMode === 'overview' && (
         <div className="border-b border-border px-4 py-3 bg-muted/20">
@@ -573,7 +573,7 @@ export function IntegratedCustomerPage({
       <div className="flex-1 overflow-hidden">
         {viewMode === 'overview' ? (
           /* Overview Mode - Customer Cards */
-          <div className="flex-1 min-h-0 h-full overflow-y-auto scroll-container scrollbar-styled p-4">
+          <div className="flex-1 min-h-0 h-full overflow-y-auto scroll-container scrollbar-styled p-4 pb-20 md:pb-4">
             <div className="max-w-7xl mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredCustomers.map((customer) => (

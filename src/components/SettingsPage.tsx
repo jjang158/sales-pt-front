@@ -281,40 +281,17 @@ export function SettingsPage({ onNavigate, logout }: SettingsPageProps) {
                 <CardTitle>보안 설정</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button variant="outline" className="rounded-xl">
-                  비밀번호 변경
+            <CardContent>
+              {logout && (
+                <Button
+                  variant="destructive"
+                  className="rounded-xl w-full md:w-auto"
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  로그아웃
                 </Button>
-                <Button variant="outline" className="rounded-xl">
-                  2단계 인증 설정
-                </Button>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="font-medium">데이터 보호</h4>
-                <p className="text-sm text-muted-foreground">
-                  모든 음성 데이터는 256-bit AES 암호화로 보호되며, 개인정보는 엄격히 관리됩니다.
-                </p>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="font-medium">계정 관리</h4>
-                {logout && (
-                  <Button
-                    variant="destructive"
-                    className="rounded-xl w-full md:w-auto"
-                    onClick={logout}
-                  >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    로그아웃
-                  </Button>
-                )}
-              </div>
+              )}
             </CardContent>
           </Card>
 
