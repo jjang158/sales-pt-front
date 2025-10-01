@@ -4,8 +4,10 @@ import { IntegratedCustomerPage } from '../IntegratedCustomerPage';
 import { ClientDetailPage } from '../customer/detail/ClientDetailPage';
 import { SettingsPage } from '../SettingsPage';
 import { ReviewPage } from '../review/ReviewPage';
-import { RecordPage } from '../record/RecordPage';
-import type { Page, RecordingContext } from '../../types/index';
+import { RecordPage } from '../pages/RecordPage';
+import { DocumentsPage } from '../pages/DocumentsPage';
+import { LoginPage } from '../pages/LoginPage';
+import type { Page, RecordingContext, User } from '../../types/index';
 import { FloatingChatbot } from '../FloatingChatbot';
 
 interface PageRouterProps {
@@ -32,6 +34,8 @@ interface PageRouterProps {
   readonly navigateTo: (page: Page, data?: any) => void;
   readonly selectCustomer: (customerId: string) => void;
   readonly startRecording: (context: RecordingContext) => void;
+  readonly login: (user: User) => void;
+  readonly logout: () => void;
 }
 
 const PAGES = {
@@ -55,6 +59,8 @@ export const PageRouter = memo<PageRouterProps>(
     navigateTo,
     selectCustomer,
     startRecording,
+    login,
+    logout,
   }) => {
     const commonProps = {
       onNavigate: navigateTo,
@@ -117,7 +123,13 @@ export const PageRouter = memo<PageRouterProps>(
         return <IntegratedCustomerPage {...commonProps} />;
 
       case 'settings':
-        return <SettingsPage {...commonProps} />;
+        return <SettingsPage {...commonProps} logout={logout} />;
+
+      case 'documents':
+        return <DocumentsPage />;
+
+      case 'login':
+        return <LoginPage {...commonProps} onLogin={login} />;
 
       default:
         throw new Error(`Unknown page: ${currentPage}`);

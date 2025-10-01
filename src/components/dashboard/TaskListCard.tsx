@@ -64,7 +64,7 @@ export function TaskListCard({
   };
 
   return (
-    <Card className="rounded-2xl shadow-lg relative">
+    <Card className="rounded-2xl shadow-lg relative overflow-visible">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
@@ -235,13 +235,14 @@ export function TaskListCard({
         )}
       </CardContent>
 
-      {/* Floating Add Todo Button */}
+      {/* Floating Add Todo Button - Fixed to bottom right */}
       <Button
         variant="outline"
         size="sm"
-        className={`absolute bottom-4 right-4 w-10 h-10 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow z-10 bg-background border-2 ${
+        className={`fixed bottom-4 right-4 w-10 h-10 rounded-full p-0 shadow-lg hover:shadow-xl transition-shadow z-50 bg-background border-2 ${
           !isTodayOrFuture(selectedDate) ? 'opacity-50 cursor-not-allowed' : ''
         }`}
+        style={{ position: 'fixed' }}
         disabled={!isTodayOrFuture(selectedDate)}
         onClick={() => {
           if (isTodayOrFuture(selectedDate)) {

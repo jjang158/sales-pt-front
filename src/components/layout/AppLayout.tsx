@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Navigation } from '../Navigation';
 import { AppHeader } from './AppHeader';
+import { useIsMobile } from '../ui/use-mobile';
 import type { Page } from '../../types/index';
 
 interface AppLayoutProps {
@@ -10,18 +11,47 @@ interface AppLayoutProps {
 }
 
 /**
- * Responsive tablet-optimized layout shell
+ * Responsive layout shell - automatically switches between desktop and mobile layouts
  */
-export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, children }) => (
-  <div className="h-screen bg-background p-6 transition-colors duration-300">
-    <div className="h-full bg-card rounded-3xl shadow-xl border border-border/50 flex overflow-hidden relative">
-      <Navigation currentPage={currentPage} onNavigate={onNavigate} />
-      <div className="flex-1 flex flex-col min-h-0">
-        <AppHeader />
-        <main className="flex-1 min-h-0 bg-background/50 page-container">
+export const AppLayout = memo<AppLayoutProps>(({ currentPage, onNavigate, children }) => {
+  const isMobile = useIsMobile();
+  const isLoginPage = currentPage === 'login';
+
+  if (isLoginPage) {
+    return (
+      <div className="mobile-scroll-container bg-background flex flex-col safe-area-inset">
+        <main className="flex-1 bg-background page-container overflow-auto">
           {children}
         </main>
       </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <div className="md:hidden h-screen bg-background flex flex-col mobile-safe-left mobile-safe-right">
+        <AppHeader />
+        <main className="flex-1 overflow-auto mobile-safe-bottom">
+          {children}
+          {/* 네비게이션 바와 동일한 높이의 투명 스페이서 */}
+          <div className="h-16 w-full"></div>
+        </main>
+        <Navigation currentPage={currentPage} onNavigate={onNavigate} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="hidden md:block h-screen bg-background p-6 transition-colors duration-300">
+      <div className="bg-card rounded-3xl shadow-xl border border-border/50 flex relative" style={{ height: 'calc(100% - 3.5rem)' }}>
+        <Navigation currentPage={currentPage} onNavigate={onNavigate} />
+        <div className="flex-1 flex flex-col min-h-0">
+          <AppHeader />
+          <main className="flex-1 min-h-0 bg-background/50 page-container">
+            {children}
+          </main>
+        </div>
+      </div>
     </div>
-  </div>
-));
+  );
+});

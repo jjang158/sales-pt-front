@@ -1,19 +1,18 @@
-import { useMemo, useReducer } from 'react';
-import type { Page, RecordingContext } from '../types/index';
+import { useReducer, useMemo } from 'react';
+import type { Page, RecordingContext, User } from '../types/index';
 
 interface ApplicationState {
   readonly currentPage: Page;
   readonly selectedCustomerId: string | null;
   readonly recordingContext: RecordingContext | null;
+  readonly user: User | null;
   
-  // 🔥 STT 결과 저장
   readonly sttResult: {
     transcript: string;
     consultationData: any;
     aiInsights: any;
   } | null;
-  
-  // 🔥 새로 추가: RecordPage에서 전달된 데이터
+
   readonly recordingData: {
     recordedText: string;
     context: any;
@@ -32,7 +31,9 @@ type StateAction =
   | { type: 'NAVIGATE_WITH_DATA'; payload: { page: Page; data: any } }
   | { type: 'SELECT_CUSTOMER'; payload: { customerId: string } }
   | { type: 'START_RECORDING'; payload: { context: RecordingContext } }
-  | { type: 'FINISH_RECORDING'; payload: { transcript: string; consultationData: any; aiInsights: any } };
+  | { type: 'FINISH_RECORDING'; payload: { transcript: string; consultationData: any; aiInsights: any } }
+  | { type: 'LOGIN'; payload: { user: User } }
+  | { type: 'LOGOUT' };
 
 const reducer = (state: ApplicationState, action: StateAction): ApplicationState => {
   switch (action.type) {
@@ -42,7 +43,6 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
         currentPage: action.payload,
         selectedCustomerId: action.payload === 'client-detail' ? state.selectedCustomerId : null,
         recordingContext: action.payload === 'record' ? state.recordingContext : null,
-        // review 페이지가 아니면 recordingData 초기화
         recordingData: action.payload === 'review' ? state.recordingData : null,
       };
       
@@ -91,29 +91,66 @@ const reducer = (state: ApplicationState, action: StateAction): ApplicationState
         sttResult: action.payload,
         recordingData: null,
       };
-      
+
+    case 'LOGIN':
+      localStorage.setItem('user', JSON.stringify(action.payload.user));
+      return {
+        ...state,
+        currentPage: 'dashboard',
+        user: action.payload.user,
+      };
+
+    case 'LOGOUT':
+      localStorage.removeItem('user');
+      return {
+        ...getInitialState(),
+        currentPage: 'login',
+      };
+
     default:
       return state;
   }
 };
 
-const initialState: ApplicationState = {
-  currentPage: 'dashboard',
-  selectedCustomerId: null,
-  recordingContext: null,
-  sttResult: null,
-  recordingData: null, // 🔥 초기값 추가
+const getInitialState = (): ApplicationState => {
+  const defaultState = {
+    currentPage: 'login' as Page,
+    selectedCustomerId: null,
+    recordingContext: null,
+    user: null,
+    sttResult: null,
+    recordingData: null,
+  };
+
+  if (typeof window === 'undefined') {
+    return defaultState;
+  }
+
+  try {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      return {
+        ...defaultState,
+        currentPage: 'dashboard',
+        user,
+      };
+    }
+  } catch (error) {
+    localStorage.removeItem('user');
+    if (import.meta.env.DEV) {
+      console.warn('localStorage에서 잘못된 사용자 데이터 제거:', error);
+    }
+  }
+
+  return defaultState;
 };
 
-/**
- * Type-safe application state with auto-cleanup
- */
 export const useApplicationState = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, getInitialState());
 
   const actions = useMemo(
     () => ({
-      // 🔥 기존 navigateTo - 데이터 없이 페이지만 이동
       navigateTo: (page: Page, data?: any) => {
         if (data) {
           dispatch({ type: 'NAVIGATE_WITH_DATA', payload: { page, data } });
@@ -128,12 +165,14 @@ export const useApplicationState = () => {
       startRecording: (context: RecordingContext) =>
         dispatch({ type: 'START_RECORDING', payload: { context } }),
 
-      // 🔥 STT 완료 후 결과 저장 + review 이동
       finishRecording: (result: {
         transcript: string;
         consultationData: any;
         aiInsights: any;
       }) => dispatch({ type: 'FINISH_RECORDING', payload: result }),
+
+      login: (user: User) => dispatch({ type: 'LOGIN', payload: { user } }),
+      logout: () => dispatch({ type: 'LOGOUT' }),
     }),
     []
   );
